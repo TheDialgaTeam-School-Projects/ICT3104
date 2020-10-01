@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.mapbox.vision:mapbox-android-vision-ar:0.13.0@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0a914099d1b102edff0ce86122e6d046/jetified-mapbox-android-vision-ar-0.13.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0a914099d1b102edff0ce86122e6d046/jetified-mapbox-android-vision-ar-0.13.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0a914099d1b102edff0ce86122e6d046/jetified-mapbox-android-vision-ar-0.13.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mapbox.vision/mapbox-android-vision-ar/0.13.0/f50765275d484c0868a9b14f48d1f0294420464d/mapbox-android-vision-ar-0.13.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

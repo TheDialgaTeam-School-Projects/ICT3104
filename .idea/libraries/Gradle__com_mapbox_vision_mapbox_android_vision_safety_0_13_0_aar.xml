@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.mapbox.vision:mapbox-android-vision-safety:0.13.0@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a33f7c0c9bdd34260701539de0430ac1/jetified-mapbox-android-vision-safety-0.13.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a33f7c0c9bdd34260701539de0430ac1/jetified-mapbox-android-vision-safety-0.13.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a33f7c0c9bdd34260701539de0430ac1/jetified-mapbox-android-vision-safety-0.13.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mapbox.vision/mapbox-android-vision-safety/0.13.0/4bbcb3c573b2f892073c97d861c4c8aeeb13b984/mapbox-android-vision-safety-0.13.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
