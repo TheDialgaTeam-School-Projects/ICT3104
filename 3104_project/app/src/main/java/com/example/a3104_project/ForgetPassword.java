@@ -21,7 +21,7 @@ public class ForgetPassword extends AppCompatActivity {
     private FirebaseAuth mAuth;
     String TAG = "Firebase";
     EditText username;
-
+    String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +39,21 @@ public class ForgetPassword extends AppCompatActivity {
                 //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 //startActivity(intent);
                 forgetPassword(username.getText().toString());
+
+
+                if(username.getText().toString().isEmpty()) {
+                    Toast.makeText(getApplicationContext(),"enter email address",Toast.LENGTH_SHORT).show();
+                }else {
+                    if (username.getText().toString().trim().matches(emailPattern)) {
+                        forgetPassword(username.getText().toString());
+                        Toast.makeText(getApplicationContext(),"valid email address",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(),"Invalid email address", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+
+
             }
         });
     }

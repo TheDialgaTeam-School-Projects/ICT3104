@@ -28,9 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Signup">
 
-        </activity>
         <activity android:name=".Login">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
@@ -42,9 +40,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
         <activity
-            android:name=".MainActivity"
-            android:label="Main Activity" >
+        android:name=".MainActivity"
+        android:label="Main Activity" >
+    </activity>
+
+        <activity
+        android:name=".ForgetPassword"
+        android:label="ForgetPassword Activity" >
+    </activity>
+
+        <activity
+            android:name=".Signup"
+            android:label="Signup Activity">
+
         </activity>
+
 
 
     </application>

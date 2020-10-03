@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,6 +28,7 @@ public class Login extends AppCompatActivity {
     String TAG = "Firebase";
     EditText username,password;
     int REQUEST_WRITE_STORAGE = 3;
+    TextView test_forgetpass,text_Signup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,31 @@ public class Login extends AppCompatActivity {
                 signIn(username.getText().toString(), password.getText().toString());
             }
         });
+
+
+
+        test_forgetpass=(TextView)findViewById(R.id.text_forgetpass);
+        test_forgetpass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Login.this,ForgetPassword.class);
+                startActivity(intent);
+
+            }
+        });
+
+        text_Signup=(TextView)findViewById(R.id.text_signUp);
+        text_Signup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Login.this,Signup.class);
+                startActivity(intent);
+
+            }
+        });
+
+
+
     }
 
     void signIn(String user, String pw)
