@@ -75,7 +75,7 @@ public class Signup extends AppCompatActivity {
                 data.put("Commute Type", spinner.getSelectedItem().toString());
                 data.put("Gender", genderType);
                 data.put("Email", username.getText().toString());
-                db.collection("Users").add(data);
+                db.collection("Users").document(username.getText().toString()).set(data);
                 createAccount(username.getText().toString(), password.getText().toString());
                 Intent intent = new Intent(Signup.this, Login.class);
                 startActivity(intent);
