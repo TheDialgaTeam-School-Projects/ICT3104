@@ -1,5 +1,6 @@
 package com.example.a3104_project;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -36,10 +37,9 @@ public class ForgetPassword extends AppCompatActivity {
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                //startActivity(intent);
+                Intent intent = new Intent(ForgetPassword.this, Login.class);
+                startActivity(intent);
                 forgetPassword(username.getText().toString());
-
 
                 if(username.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(),"enter email address",Toast.LENGTH_SHORT).show();
