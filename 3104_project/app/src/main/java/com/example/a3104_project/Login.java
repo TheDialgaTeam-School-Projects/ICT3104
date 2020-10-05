@@ -55,8 +55,8 @@ public class Login extends AppCompatActivity {
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                //startActivity(intent);
+                Intent intent = new Intent(Login.this, MainActivity.class);
+                startActivity(intent);
                 signIn(username.getText().toString(), password.getText().toString());
             }
         });
@@ -97,8 +97,6 @@ public class Login extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(Login.this, MainActivity.class);
-                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
