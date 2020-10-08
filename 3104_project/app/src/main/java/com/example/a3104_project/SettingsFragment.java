@@ -64,9 +64,8 @@ public class SettingsFragment extends Fragment {
                     startActivity(i);
                 }
         });
-
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_settings, container, false);
         return view;
