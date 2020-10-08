@@ -2,7 +2,6 @@ package com.example.a3104_project;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
@@ -35,6 +34,10 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        ReadWriteFb object = new ReadWriteFb();
+        String one = object.getCommuteMethod("flaretay@hotmail.com");
+        System.out.println("LET GOOOOOOOOOOOOOOO : " + one);
+        //System.out.println("GOOOOOOOOOOOOOOO LET : " + two);
 
         int permissionCheckStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA);
         int permissionAccessFineLocation = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
