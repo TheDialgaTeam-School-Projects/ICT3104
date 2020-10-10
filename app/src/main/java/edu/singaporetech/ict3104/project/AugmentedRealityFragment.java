@@ -14,6 +14,10 @@ public class AugmentedRealityFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_augmented_reality, container, false);
+        final View view = inflater.inflate(R.layout.fragment_augmented_reality, container, false);
+
+
+
+        return view;
     }
 }
