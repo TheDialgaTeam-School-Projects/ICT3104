@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="edu.singaporetech.ict3104.project.HomeFragment"
+        android:label="@string/nav_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_agumentedRealityFragment"
+            app:destination="@id/agumentedRealityFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_achievements"
+        android:name="edu.singaporetech.ict3104.project.AchievementsFragment"
+        android:label="@string/nav_achievements"
+        tools:layout="@layout/fragment_achievements" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="edu.singaporetech.ict3104.project.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/agumentedRealityFragment"
+        android:name="edu.singaporetech.ict3104.project.AugmentedRealityFragment"
+        android:label="fragment_agumented_reality"
+        tools:layout="@layout/fragment_augmented_reality" />
+</navigation>
