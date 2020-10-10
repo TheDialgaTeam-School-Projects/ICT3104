@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- *** ADD *** -->
-    <string name="redirect_url">my-app://authICT3104</string>
-    <string name="client_id">KrOnNKaYJC2DwBNa</string>
-    <string name="traffic_service">https://traffic.arcgis.com/arcgis/rest/services/World/Traffic/MapServer</string>
-</resources>
