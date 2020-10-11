@@ -1,4 +1,4 @@
-package edu.singaporetech.ict3104.project.ar;
+package edu.singaporetech.ict3104.project.arcore;
 
 import android.opengl.GLES30;
 import android.opengl.GLException;
@@ -9,10 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GLError {
-
-    private GLError() {
-    }
+public final class GLError {
 
     public static void maybeThrowGLException(String reason, String api) {
         List<Integer> errorCodes = getGlErrors();

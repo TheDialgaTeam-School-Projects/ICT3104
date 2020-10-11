@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import edu.singaporetech.ict3104.project.LoginActivity;
+import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
@@ -41,26 +41,6 @@ public class SettingsFragment extends Fragment {
         commuteMethods.add("Walking");
         commuteMethods.add("Wheelchair");
         commuteMethods.add("Parent with Pram");
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (firebaseUser == null) {
-            Toast.makeText(getContext(), "User not logged in.", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getContext(), LoginActivity.class));
-            return;
-        }
-
-        email = firebaseUser.getEmail();
-
-        if (email == null) {
-            Toast.makeText(getContext(), "Unexpected error with the user.", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getContext(), LoginActivity.class));
-        }
     }
 
     @Nullable
@@ -96,13 +76,14 @@ public class SettingsFragment extends Fragment {
         Button buttonSettingsLogout = view.findViewById(R.id.buttonSettingsLogout);
         buttonSettingsLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(requireContext(), LoginActivity.class));
         });
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        email = requireActivity().getIntent().getStringExtra(MainActivity.INTENT_USER_EMAIL);
 
         if (savedInstanceState != null) {
             textViewSettingsUsername.setText(savedInstanceState.getString(EMAIL_ADDRESS_KEY, ""));
@@ -113,7 +94,7 @@ public class SettingsFragment extends Fragment {
             FireStoreHelper.getUserData(email)
                     .addOnFailureListener(requireActivity(), e -> {
                         Log.e(SettingsFragment.class.getName(), "Unable to retrieve user data.", e);
-                        Toast.makeText(requireActivity(), "Unable to retrieve user data.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireActivity(), "Unable to retrieve user data.", Toast.LENGTH_LONG).show();
                     })
                     .addOnSuccessListener(requireActivity(), documentSnapshot -> {
                         final String commuteType = documentSnapshot.getString("Commute Type");

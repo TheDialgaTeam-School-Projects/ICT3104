@@ -114,7 +114,10 @@ public class LoginActivity extends AppCompatActivity {
                             .putString(EMAIL_ADDRESS_KEY, email)
                             .putString(PASSWORD_KEY, password)
                             .apply();
-                    startActivity(new Intent(this, MainActivity.class));
+
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.putExtra(MainActivity.INTENT_USER_EMAIL, email);
+                    startActivity(intent);
                 });
     }
 }

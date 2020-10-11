@@ -1,5 +1,6 @@
-package edu.singaporetech.ict3104.project.ar;
+package edu.singaporetech.ict3104.project.arcore;
 
+import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 
@@ -8,7 +9,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class SurfaceViewRenderer {
 
-    public SurfaceViewRenderer(GLSurfaceView glSurfaceView, Renderer renderer) {
+    private final AssetManager assetManager;
+
+    public SurfaceViewRenderer(GLSurfaceView glSurfaceView, Renderer renderer, AssetManager assetManager) {
+        this.assetManager = assetManager;
+
         glSurfaceView.setPreserveEGLContextOnPause(true);
         glSurfaceView.setEGLContextClientVersion(3);
         glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -37,12 +42,21 @@ public class SurfaceViewRenderer {
         glSurfaceView.setWillNotDraw(false);
     }
 
+    public void draw(Mesh mesh, Shader shader) {
+        shader.use();
+        mesh.draw();
+    }
+
     public interface Renderer {
         void onSurfaceCreated(SurfaceViewRenderer surfaceViewRenderer);
 
         void onSurfaceChanged(SurfaceViewRenderer surfaceViewRenderer, int width, int height);
 
         void onDrawFrame(SurfaceViewRenderer surfaceViewRenderer);
+    }
+
+    AssetManager getAssets() {
+        return assetManager;
     }
 
 }
