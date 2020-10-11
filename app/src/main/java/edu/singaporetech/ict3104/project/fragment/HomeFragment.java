@@ -1,4 +1,4 @@
-package edu.singaporetech.ict3104.project;
+package edu.singaporetech.ict3104.project.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import edu.singaporetech.ict3104.project.LoginActivity;
+import edu.singaporetech.ict3104.project.R;
 
 public class HomeFragment extends Fragment {
 

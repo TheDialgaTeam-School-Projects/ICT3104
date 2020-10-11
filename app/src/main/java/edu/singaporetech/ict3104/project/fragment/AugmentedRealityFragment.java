@@ -1,6 +1,5 @@
-package edu.singaporetech.ict3104.project;
+package edu.singaporetech.ict3104.project.fragment;
 
-import android.media.Image;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -15,9 +14,7 @@ import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
-import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
-import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
@@ -31,7 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import edu.singaporetech.ict3104.project.permissionHelper.CameraPermissionHelper;
+import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
 
 public class AugmentedRealityFragment extends Fragment implements GLSurfaceView.Renderer {
 
@@ -57,17 +55,6 @@ public class AugmentedRealityFragment extends Fragment implements GLSurfaceView.
         installArCoreRequested = false;
 
         return view;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (session != null) {
-            // Explicitly close ARCore Session to release native resources.
-            session.close();
-            session = null;
-        }
     }
 
     @Override
@@ -156,6 +143,17 @@ public class AugmentedRealityFragment extends Fragment implements GLSurfaceView.
                 CameraPermissionHelper.launchPermissionSettings(getActivity());
             }
             Navigation.findNavController(requireView()).navigate(R.id.action_agumentedRealityFragment_to_navigation_home);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (session != null) {
+            // Explicitly close ARCore Session to release native resources.
+            session.close();
+            session = null;
         }
     }
 
