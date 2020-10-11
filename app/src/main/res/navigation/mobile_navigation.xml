@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="edu.singaporetech.ict3104.project.HomeFragment"
+        android:name="edu.singaporetech.ict3104.project.fragment.HomeFragment"
         android:label="@string/nav_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -21,18 +21,18 @@
 
     <fragment
         android:id="@+id/navigation_achievements"
-        android:name="edu.singaporetech.ict3104.project.AchievementsFragment"
+        android:name="edu.singaporetech.ict3104.project.fragment.AchievementsFragment"
         android:label="@string/nav_achievements"
         tools:layout="@layout/fragment_achievements" />
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="edu.singaporetech.ict3104.project.SettingsFragment"
+        android:name="edu.singaporetech.ict3104.project.fragment.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/agumentedRealityFragment"
-        android:name="edu.singaporetech.ict3104.project.AugmentedRealityFragment"
+        android:name="edu.singaporetech.ict3104.project.fragment.AugmentedRealityFragment"
         android:label="fragment_agumented_reality"
         tools:layout="@layout/fragment_augmented_reality" >
         <action

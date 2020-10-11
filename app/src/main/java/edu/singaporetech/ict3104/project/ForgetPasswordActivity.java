@@ -9,19 +9,30 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class ForgetPasswordActivity extends AppCompatActivity {
 
+    private static final String TAG = ForgetPasswordActivity.class.getName();
+
+    private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
+
+    private EditText editTextForgetEmailAddress;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forget_password);
 
-        final EditText editTextForgetEmailAddress = findViewById(R.id.editTextForgetEmailAddress);
-        final Button buttonForgetPasswordConfirm = findViewById(R.id.buttonForgetPasswordConfirm);
+        editTextForgetEmailAddress = findViewById(R.id.editTextForgetEmailAddress);
 
+        final Button buttonForgetPasswordConfirm = findViewById(R.id.buttonForgetPasswordConfirm);
         buttonForgetPasswordConfirm.setOnClickListener(v -> {
+            KeyboardHelper.hideKeyboard(this);
+
             boolean isValid = true;
             String emailAddress = editTextForgetEmailAddress.getText().toString().trim();
 
@@ -39,15 +50,26 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        editTextForgetEmailAddress.setText(savedInstanceState.getString(EMAIL_ADDRESS_KEY, ""));
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EMAIL_ADDRESS_KEY, editTextForgetEmailAddress.getText().toString());
+    }
+
     private void recoverAccount(String emailAddress) {
-        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuth.sendPasswordResetEmail(emailAddress)
+        FirebaseAuth.getInstance().sendPasswordResetEmail(emailAddress)
                 .addOnFailureListener(this, e -> {
-                    Log.e(LoginActivity.class.getName(), "Unable to send recovery email.", e);
-                    Toast.makeText(this, "Unable to send recovery email.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Unable to send recovery email.", e);
+                    Toast.makeText(this, "Unable to send recovery email.", Toast.LENGTH_LONG).show();
                 })
                 .addOnSuccessListener(this, aVoid -> {
-                    Toast.makeText(this, "Recovery email has been sent.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Recovery email has been sent.", Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, LoginActivity.class));
                 });
     }

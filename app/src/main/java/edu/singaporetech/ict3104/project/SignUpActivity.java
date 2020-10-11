@@ -12,41 +12,63 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
+import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+    private static final String TAG = SignUpActivity.class.getName();
 
-        final EditText editTextSignUpEmailAddress = findViewById(R.id.editTextSignUpEmailAddress);
-        final EditText editTextSignUpPassword = findViewById(R.id.editTextSignUpPassword);
-        final EditText editTextSignUpPasswordConfirm = findViewById(R.id.editTextSignUpPasswordConfirm);
-        final EditText editTextSignUpAge = findViewById(R.id.editTextSignUpAge);
-        final RadioGroup radioGroupSignUpGender = findViewById(R.id.radioGroupSignUpGender);
-        final RadioButton radioButtonSignUpMale = findViewById(R.id.radioButtonSignUpMale);
-        final Spinner spinnerSignUpCommuteMethod = findViewById(R.id.spinnerSignUpCommuteMethod);
-        final Button buttonSignUp = findViewById(R.id.buttonSignUp);
+    private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
+    private static final String PASSWORD_KEY = "PASSWORD_KEY";
+    private static final String PASSWORD_CONFIRM_KEY = "PASSWORD_CONFIRM_KEY";
+    private static final String AGE_KEY = "AGE_KEY";
+    private static final String GENDER_KEY = "GENDER_KEY";
+    private static final String COMMUTE_METHOD_KEY = "COMMUTE_METHOD_KEY";
 
-        radioButtonSignUpMale.setChecked(true);
+    private final ArrayList<String> commuteMethods = new ArrayList<>();
 
-        final ArrayList<String> commuteMethods = new ArrayList<>();
+    private EditText editTextSignUpEmailAddress;
+    private EditText editTextSignUpPassword;
+    private EditText editTextSignUpPasswordConfirm;
+    private EditText editTextSignUpAge;
+    private RadioGroup radioGroupSignUpGender;
+    private Spinner spinnerSignUpCommuteMethod;
+
+    public SignUpActivity() {
         commuteMethods.add("Walking");
         commuteMethods.add("Wheelchair");
         commuteMethods.add("Parent with Pram");
+    }
 
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sign_up);
+
+        editTextSignUpEmailAddress = findViewById(R.id.editTextSignUpEmailAddress);
+        editTextSignUpPassword = findViewById(R.id.editTextSignUpPassword);
+        editTextSignUpPasswordConfirm = findViewById(R.id.editTextSignUpPasswordConfirm);
+        editTextSignUpAge = findViewById(R.id.editTextSignUpAge);
+        radioGroupSignUpGender = findViewById(R.id.radioGroupSignUpGender);
+        spinnerSignUpCommuteMethod = findViewById(R.id.spinnerSignUpCommuteMethod);
         spinnerSignUpCommuteMethod.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, commuteMethods));
-        spinnerSignUpCommuteMethod.setSelection(0);
 
+        Button buttonSignUp = findViewById(R.id.buttonSignUp);
         buttonSignUp.setOnClickListener(v -> {
+            KeyboardHelper.hideKeyboard(this);
+
             boolean isValid = true;
 
             final String emailAddress = editTextSignUpEmailAddress.getText().toString().trim();
@@ -56,7 +78,6 @@ public class SignUpActivity extends AppCompatActivity {
             final String gender = ((RadioButton) findViewById(radioGroupSignUpGender.getCheckedRadioButtonId())).getText().toString();
             final String commuteMethod = spinnerSignUpCommuteMethod.getSelectedItem().toString();
 
-            // Validation
             if (emailAddress.isEmpty()) {
                 editTextSignUpEmailAddress.setError("Email address cannot be empty.");
                 isValid = false;
@@ -87,7 +108,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             if (isValid) {
-                Map<String, String> data = new HashMap<>();
+                Map<String, Object> data = new HashMap<>();
                 data.put("Email", emailAddress);
                 data.put("Age", age);
                 data.put("Gender", gender);
@@ -98,23 +119,56 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void signUp(String email, String password, Map<String, String> data) {
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        editTextSignUpEmailAddress.setText(savedInstanceState.getString(EMAIL_ADDRESS_KEY, ""));
+        editTextSignUpPassword.setText(savedInstanceState.getString(PASSWORD_KEY, ""));
+        editTextSignUpPasswordConfirm.setText(savedInstanceState.getString(PASSWORD_CONFIRM_KEY, ""));
+        editTextSignUpAge.setText(savedInstanceState.getString(AGE_KEY, ""));
+        ((RadioButton) findViewById(savedInstanceState.getInt(GENDER_KEY, R.id.radioButtonSignUpMale))).setChecked(true);
+        spinnerSignUpCommuteMethod.setSelection(savedInstanceState.getInt(COMMUTE_METHOD_KEY, 0));
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EMAIL_ADDRESS_KEY, editTextSignUpEmailAddress.getText().toString());
+        outState.putString(PASSWORD_KEY, editTextSignUpPassword.getText().toString());
+        outState.putString(PASSWORD_CONFIRM_KEY, editTextSignUpPassword.getText().toString());
+        outState.putString(AGE_KEY, editTextSignUpAge.getText().toString());
+        outState.putInt(GENDER_KEY, radioGroupSignUpGender.getCheckedRadioButtonId());
+        outState.putInt(COMMUTE_METHOD_KEY, spinnerSignUpCommuteMethod.getSelectedItemPosition());
+    }
+
+    private void signUp(String email, String password, Map<String, Object> data) {
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnFailureListener(this, e -> {
-                    Log.e(SignUpActivity.class.getName(), "Register failed.", e);
-                    Toast.makeText(this, "Register failed.", Toast.LENGTH_SHORT).show();
+                    if (e instanceof FirebaseAuthWeakPasswordException) {
+                        final String reason = ((FirebaseAuthWeakPasswordException) e).getReason();
+                        editTextSignUpPassword.setError(reason);
+                        Log.e(TAG, reason, e);
+                        Toast.makeText(this, reason, Toast.LENGTH_LONG).show();
+                    } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                        editTextSignUpPassword.setError(e.getMessage());
+                        Log.e(TAG, e.getMessage(), e);
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    } else if (e instanceof FirebaseAuthUserCollisionException) {
+                        editTextSignUpEmailAddress.setError(e.getMessage());
+                        Log.e(TAG, e.getMessage(), e);
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 })
-                .addOnSuccessListener(this, authResult -> {
-                    final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                    firestore.collection("Users").document(email).set(data)
-                            .addOnFailureListener(this, e -> {
-                                Log.e(SignUpActivity.class.getName(), "Register failed.", e);
-                                Toast.makeText(this, "Register failed.", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnSuccessListener(this, aVoid -> {
-                                startActivity(new Intent(this, LoginActivity.class));
-                            });
-                });
+                .addOnSuccessListener(this, authResult -> FireStoreHelper.setOrUpdateUserData(email, data)
+                        .addOnFailureListener(this, e -> {
+                            Log.e(TAG, "Unexpected error occurred when updating user data.", e);
+                            Toast.makeText(this, "Unexpected error occurred when updating user data.", Toast.LENGTH_LONG).show();
+                        })
+                        .addOnSuccessListener(this, aVoid -> {
+                            Toast.makeText(this, "Register success.", Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(this, LoginActivity.class));
+                        }));
     }
+
 }

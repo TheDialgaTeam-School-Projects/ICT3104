@@ -6,110 +6,127 @@
     android:layout_height="match_parent"
     tools:context="edu.singaporetech.ict3104.project.SignUpActivity">
 
-    <EditText
-        android:id="@+id/editTextSignUpEmailAddress"
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:autofillHints="emailAddress"
-        android:ems="10"
-        android:hint="@string/sign_up_email_address"
-        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <EditText
-        android:id="@+id/editTextSignUpPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:autofillHints="password"
-        android:ems="10"
-        android:hint="@string/sign_up_password"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSignUpEmailAddress" />
-
-    <EditText
-        android:id="@+id/editTextSignUpPasswordConfirm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:autofillHints="password"
-        android:ems="10"
-        android:hint="@string/sign_up_password_confirm"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSignUpPassword" />
-
-    <EditText
-        android:id="@+id/editTextSignUpAge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="@string/sign_up_age"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSignUpPasswordConfirm"
-        android:autofillHints="" />
-
-    <RadioGroup
-        android:id="@+id/radioGroupSignUpGender"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="@+id/editTextSignUpAge"
-        app:layout_constraintStart_toStartOf="@+id/editTextSignUpAge"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSignUpAge">
-
-        <RadioButton
-            android:id="@+id/radioButtonSignUpMale"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sign_up_male"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_gravity="center">
 
-        <RadioButton
-            android:id="@+id/radioButtonSignUpFemale"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sign_up_female" />
-    </RadioGroup>
+            <EditText
+                android:id="@+id/editTextSignUpEmailAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autofillHints="emailAddress"
+                android:ems="10"
+                android:hint="@string/sign_up_email_address"
+                android:inputType="textEmailAddress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/sign_up_commute_method"
-        app:layout_constraintEnd_toEndOf="@+id/radioGroupSignUpGender"
-        app:layout_constraintStart_toStartOf="@+id/radioGroupSignUpGender"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroupSignUpGender" />
+            <EditText
+                android:id="@+id/editTextSignUpPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:autofillHints="password"
+                android:ems="10"
+                android:hint="@string/sign_up_password"
+                android:inputType="textPassword"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextSignUpEmailAddress" />
 
-    <Spinner
-        android:id="@+id/spinnerSignUpCommuteMethod"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="@+id/textView"
-        app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+            <EditText
+                android:id="@+id/editTextSignUpPasswordConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:autofillHints="password"
+                android:ems="10"
+                android:hint="@string/sign_up_password_confirm"
+                android:inputType="textPassword"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextSignUpPassword" />
 
-    <Button
-        android:id="@+id/buttonSignUp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/sign_up_sign_up"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerSignUpCommuteMethod" />
+            <EditText
+                android:id="@+id/editTextSignUpAge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:autofillHints=""
+                android:ems="10"
+                android:hint="@string/sign_up_age"
+                android:inputType="number"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextSignUpPasswordConfirm" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupSignUpGender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="@+id/editTextSignUpAge"
+                app:layout_constraintStart_toStartOf="@+id/editTextSignUpAge"
+                app:layout_constraintTop_toBottomOf="@+id/editTextSignUpAge">
+
+                <RadioButton
+                    android:id="@+id/radioButtonSignUpMale"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_up_male"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonSignUpFemale"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_up_female" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/sign_up_commute_method"
+                app:layout_constraintEnd_toEndOf="@+id/radioGroupSignUpGender"
+                app:layout_constraintStart_toStartOf="@+id/radioGroupSignUpGender"
+                app:layout_constraintTop_toBottomOf="@+id/radioGroupSignUpGender" />
+
+            <Spinner
+                android:id="@+id/spinnerSignUpCommuteMethod"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="@+id/textView"
+                app:layout_constraintStart_toStartOf="@+id/textView"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <Button
+                android:id="@+id/buttonSignUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/sign_up_sign_up"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerSignUpCommuteMethod" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

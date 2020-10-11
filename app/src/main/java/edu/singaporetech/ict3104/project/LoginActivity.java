@@ -1,8 +1,8 @@
 package edu.singaporetech.ict3104.project;
 
-import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -11,92 +11,110 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.ArrayList;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = LoginActivity.class.getName();
+
+    private static final String SHARED_PREFERENCE_KEY = "Credentials";
+
+    private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
+    private static final String PASSWORD_KEY = "PASSWORD_KEY";
+
+    private EditText editTextLoginEmailAddress;
+    private EditText editTextLoginPassword;
+
+    private SharedPreferences sharedPreferences;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        checkMobilePermission();
+        editTextLoginEmailAddress = findViewById(R.id.editTextLoginEmailAddress);
+        editTextLoginPassword = findViewById(R.id.editTextLoginPassword);
 
-        final EditText editTextLoginEmailAddress = findViewById(R.id.editTextLoginEmailAddress);
-        final EditText editTextLoginPassword = findViewById(R.id.editTextLoginPassword);
+        sharedPreferences = getSharedPreferences(SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+
+        editTextLoginEmailAddress.setText(sharedPreferences.getString(EMAIL_ADDRESS_KEY, ""));
+        editTextLoginPassword.setText(sharedPreferences.getString(PASSWORD_KEY, ""));
+
         final Button buttonLogin = findViewById(R.id.buttonLogin);
-        final TextView textViewSignUp = findViewById(R.id.textViewSignUp);
-        final TextView textViewForgetPassword = findViewById(R.id.textViewForgetPassword);
-
         buttonLogin.setOnClickListener(v -> {
-            boolean valid = true;
+            KeyboardHelper.hideKeyboard(this);
+
+            boolean isValid = true;
+
             final String emailAddress = editTextLoginEmailAddress.getText().toString().trim();
             final String password = editTextLoginPassword.getText().toString();
 
             if (emailAddress.isEmpty()) {
                 editTextLoginEmailAddress.setError("Email Address cannot be empty.");
-                valid = false;
+                isValid = false;
+            } else if (!emailAddress.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                editTextLoginEmailAddress.setError("Email address is invalid.");
+                isValid = false;
             }
 
             if (password.isEmpty()) {
                 editTextLoginPassword.setError("Password cannot be empty.");
-                valid = false;
+                isValid = false;
             }
 
-            if (valid) {
+            if (isValid) {
                 login(emailAddress, password);
             }
         });
 
+        final TextView textViewSignUp = findViewById(R.id.textViewSignUp);
         textViewSignUp.setOnClickListener(v -> {
             startActivity(new Intent(this, SignUpActivity.class));
         });
 
+        final TextView textViewForgetPassword = findViewById(R.id.textViewForgetPassword);
         textViewForgetPassword.setOnClickListener(v -> {
             startActivity(new Intent(this, ForgetPasswordActivity.class));
         });
     }
 
-    private void checkMobilePermission() {
-        final String[] permissionToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-        requestPermissions(permissionToRequest, 0);
-    }
-
-    private void login(String email, String password) {
-        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnFailureListener(this, e -> {
-                    Log.e(LoginActivity.class.getName(), "Authentication failed.", e);
-                    Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                })
-                .addOnSuccessListener(this, authResult -> {
-                    if (authResult.getUser() == null) {
-                        Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        startActivity(new Intent(this, MainActivity.class));
-                    }
-                });
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        editTextLoginEmailAddress.setText(savedInstanceState.getString(EMAIL_ADDRESS_KEY, ""));
+        editTextLoginPassword.setText(savedInstanceState.getString(PASSWORD_KEY, ""));
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EMAIL_ADDRESS_KEY, editTextLoginEmailAddress.getText().toString());
+        outState.putString(PASSWORD_KEY, editTextLoginPassword.getText().toString());
+    }
 
-        final ArrayList<String> permissionLeftToGrant = new ArrayList<>();
-
-        for (int i = 0; i < permissions.length; i++) {
-            if (grantResults[i] == PackageManager.PERMISSION_GRANTED) continue;
-            permissionLeftToGrant.add(permissions[i]);
-        }
-
-        if (permissionLeftToGrant.size() > 0) {
-            String[] permissionToGrant = new String[permissionLeftToGrant.size()];
-            permissionToGrant = permissionLeftToGrant.toArray(permissionToGrant);
-            requestPermissions(permissionToGrant, 0);
-        }
+    private void login(String email, String password) {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnFailureListener(this, e -> {
+                    if (e instanceof FirebaseAuthInvalidUserException) {
+                        Log.e(TAG, e.getMessage(), e);
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                        Log.e(TAG, e.getMessage(), e);
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnSuccessListener(this, authResult -> {
+                    sharedPreferences.edit()
+                            .putString(EMAIL_ADDRESS_KEY, email)
+                            .putString(PASSWORD_KEY, password)
+                            .apply();
+                    startActivity(new Intent(this, MainActivity.class));
+                });
     }
 }
