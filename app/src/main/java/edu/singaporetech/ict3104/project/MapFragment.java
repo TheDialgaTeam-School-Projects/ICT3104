@@ -1,9 +1,7 @@
 package edu.singaporetech.ict3104.project;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -48,16 +46,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-
-import edu.singaporetech.ict3104.project.DirectionRoute;
-import edu.singaporetech.ict3104.project.Places;
-import edu.singaporetech.ict3104.project.R;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -89,10 +80,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+       //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
+        btnOpenARNavigation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startAR();
+            }
+        });
+        btnReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (myMarker!=null){
+                    mMap.clear();
+                }
+                CreateMarkers(populateListofNearbyPlaces());
+            }
+        });
         return rootView;
     }
 
@@ -109,21 +116,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setPolicy();
-        btnOpenARNavigation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startAR();
-            }
-        });
-        btnReset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (myMarker!=null){
-                    mMap.clear();
-                }
-                CreateMarkers(populateListofNearbyPlaces());
-            }
-        });
     }
     private void startAR(){
         if(selectedLocation==null){
@@ -140,11 +132,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void setPolicy() {
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy =
-                    new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy =new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
     @Override

@@ -8,8 +8,7 @@ android:orientation="vertical" >
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/map"
-    tools:context="edu.singaporetech.ict3104.project.MapFragment"
-    android:name="com.google.android.gms.maps.SupportMapFragment"/>
+    tools:context="edu.singaporetech.ict3104.project.MapFragment"/>
 
 <Button
     android:id="@+id/btnReset"

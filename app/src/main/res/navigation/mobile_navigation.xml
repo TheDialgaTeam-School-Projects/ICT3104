@@ -33,7 +33,7 @@
         tools:layout="@layout/fragment_augmented_reality" />
 
     <fragment
-        android:id="@+id/mapFragment"
+        android:id="@+id/navigation_map"
         android:name="edu.singaporetech.ict3104.project.MapFragment"
         android:label="@string/nav_map"
         tools:layout="@layout/fragment_map" />
