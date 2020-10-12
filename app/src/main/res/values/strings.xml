@@ -31,5 +31,6 @@
 
     <string name="resetMap">Reset Map</string>
     <string name="arNavigation">3D Navigation</string>
+    <string name="startRoute">Start Route</string>
 
 </resources>

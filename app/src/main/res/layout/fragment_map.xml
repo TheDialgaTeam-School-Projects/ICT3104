@@ -11,6 +11,14 @@ android:orientation="vertical" >
     tools:context="edu.singaporetech.ict3104.project.MapFragment"/>
 
 <Button
+    android:id="@+id/btnStartRoute"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal|center_vertical"
+    android:text="@string/startRoute"
+    android:layout_alignParentEnd="true"/>
+
+<Button
     android:id="@+id/btnReset"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

@@ -3,6 +3,9 @@ package edu.singaporetech.ict3104.project;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.StrictMode;
@@ -27,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -69,7 +74,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     LatLng selectedLocation;
     private GoogleMap mMap;
     FusedLocationProviderClient mFusedLocationProviderClient;
-    Button btnReset, btnOpenARNavigation;
+    Button btnReset, btnOpenARNavigation,btnStartRoute;
     LocationManager mLocationManager;
     MapView mMapView;
 
@@ -85,6 +90,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
+        btnStartRoute = rootView.findViewById(R.id.btnStartRoute);
+        setStartJourneyButton(true);
+        btnStartRoute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startJourney();
+            }
+        });
         btnOpenARNavigation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +110,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if (myMarker!=null){
                     mMap.clear();
                 }
+                setStartJourneyButton(false);
                 CreateMarkers(populateListofNearbyPlaces());
             }
         });
@@ -176,18 +190,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onMapClick(LatLng arg0)
             {
-                new AlertDialog.Builder(getContext()).setTitle("New Random Destination?").setMessage("Do you really want to travel here?").setIcon(android.R.drawable.ic_dialog_alert)
+                new AlertDialog.Builder(getContext()).setTitle("Set Destination?").setMessage("Do you really want to travel here?").setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
-                                DirectionRoute R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), new LatLng(arg0.latitude, arg0.longitude), getText(R.string.google_maps_key).toString());
                                 clearPath();
-                                PolylineOptions options = R1.generateRoute();
                                 mMap.clear();
-                                myMarker= mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.latitude, arg0.longitude)).title("Selected Destination"));
-                                polyline = mMap.addPolyline(options);
+                                selectedLocation=new LatLng(arg0.latitude,arg0.longitude);
+                                markerOptions = new MarkerOptions().position(selectedLocation).title("Selected Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
+                                mMap.addMarker(markerOptions);
+                                setStartJourneyButton(true);
+
                             }})
                         .setNegativeButton(android.R.string.no, null).show();
+
+
             }
         });
     }
@@ -198,30 +215,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             Places t = description.get(i);
             LatLng sl = new LatLng(t.getLatitude(), t.getLongitude());
             clearPath();
-            markerOptions = new MarkerOptions().position(sl).title(t.getName());
-            listofmarker.add(mMap.addMarker(markerOptions));
+            MarkerOptions tmarkerOptions = new MarkerOptions().position(sl).title(t.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
+            listofmarker.add(mMap.addMarker(tmarkerOptions));
         }
     }
+
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        new AlertDialog.Builder(getContext()).setTitle("Set Destination?").setMessage("Do you really want to travel here?").setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
-                        for (int i =0; i<listofmarker.size(); i++){
-                            if (marker.equals(listofmarker.get(i))){
-                                Marker t =listofmarker.get(i);
-                                DirectionRoute R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), t.getPosition(), getText(R.string.google_maps_key).toString());
-                                clearPath();
-                                PolylineOptions options = R1.generateRoute();
-                                mMap.clear();
-                                mMap.addMarker(new MarkerOptions().position(t.getPosition()).title(t.getTitle()));
-                                polyline = mMap.addPolyline(options);
-                            }
+        for (int i =0; i<listofmarker.size(); i++){
+            if (marker.equals(listofmarker.get(i))){
+                Marker t =listofmarker.get(i);
+                clearPath();
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(t.getPosition()).title(t.getTitle()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
+                selectedLocation=marker.getPosition();
+                setStartJourneyButton(true);
+            }
 
-                        }
-                    }})
-                .setNegativeButton(android.R.string.no, null).show();
+        }
         return true;
     }
 
@@ -289,7 +300,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return getListofLocationsNearby("https://maps.googleapis.com/maps/api/place/nearbysearch/json?".concat(params));
         //return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?".concat(params);
     }
+    private void startJourney(){
+        if (selectedLocation != null) {
+            new AlertDialog.Builder(getContext()).setTitle("Start Journey??").setMessage("You would have to reset map if you wish to change destination?").setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
+                        DirectionRoute R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
+                        clearPath();
+                        PolylineOptions options = R1.generateRoute();
+                        mMap.clear();
+                        mMap.addMarker(new MarkerOptions().position(selectedLocation).title("selectedLocation").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
+                        polyline = mMap.addPolyline(options);
+                        setStartJourneyButton(false);
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
+        }
 
+    }
     private void updateLocationUI() {
         if (mMap == null) {
             return;
@@ -369,7 +397,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
 
     }
-
+    private void setStartJourneyButton(boolean t){
+        if(t){
+            btnStartRoute.setVisibility(View.VISIBLE);
+        }else{
+            btnStartRoute.setVisibility(View.GONE);
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
