@@ -2,12 +2,14 @@ package edu.singaporetech.ict3104.project;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,7 +19,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -54,6 +60,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -77,6 +86,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     Button btnReset, btnOpenARNavigation,btnStartRoute;
     LocationManager mLocationManager;
     MapView mMapView;
+    Handler mHandler;
+    Runnable runnable;
+    DirectionRoute R1;
 
     public MapFragment() {
         // Required empty public constructor
@@ -88,6 +100,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
        //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(lastKnownLocation!=null && R1!=null){
+                    bdccGeoDistanceAlgorithm ba = new bdccGeoDistanceAlgorithm(lastKnownLocation,R1.getLocationlist());
+                    if(ba.bdccGeoDistanceCheckWithRadius(70)){
+//                        Log.d("test","You are getting too far");
+                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
+
+                    }
+                    Log.d("test","test");
+                }
+                new Handler().postDelayed(runnable,5000);
+            }
+        };
+        mHandler = new Handler();
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
         btnStartRoute = rootView.findViewById(R.id.btnStartRoute);
@@ -124,6 +152,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
         mMapView.getMapAsync(this);
+        mHandler.postDelayed(runnable,5000);
+
     }
 
     @Override
@@ -177,10 +207,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
         getLocationPermission();
         final List<Places> placeslist = populateListofNearbyPlaces();
         CreateMarkers(placeslist);
@@ -200,7 +226,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 markerOptions = new MarkerOptions().position(selectedLocation).title("Selected Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
                                 mMap.addMarker(markerOptions);
                                 setStartJourneyButton(true);
-
                             }})
                         .setNegativeButton(android.R.string.no, null).show();
 
@@ -237,7 +262,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private List<Places> populateListofNearbyPlaces() {
-
+        getLocationPermission();
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
         LatLng mycurrent = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
         List<String> TYPE = new ArrayList<>();
         TYPE.add("bus_station");
@@ -251,7 +280,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private List<Places> getListofLocationsNearby(String url) {
-
         List<Places> placeslist = new ArrayList<Places>();
         try {
             URL url2 = new URL(url);
@@ -306,7 +334,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
-                        DirectionRoute R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
+                        R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
                         clearPath();
                         PolylineOptions options = R1.generateRoute();
                         mMap.clear();
@@ -369,7 +397,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
-        updateLocationUI();
     }
 
     private void getDeviceLocation() {
@@ -378,6 +405,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
          * cases when a location is not available.
          */
         if (locationPermissionGranted) {
+
                 @SuppressLint("MissingPermission") Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
                     @Override

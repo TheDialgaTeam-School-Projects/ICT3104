@@ -3,6 +3,7 @@ package edu.singaporetech.ict3104.project;
 
 import android.app.Application;
 import android.graphics.Color;
+import android.net.Uri;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -27,6 +28,8 @@ public class DirectionRoute extends Application {
     LatLng firstMile;
     LatLng lastMile;
     String key;
+    String mode;
+    List<LatLng>locationlist;
     public DirectionRoute(LatLng firstMile, LatLng lastMile, String key){
         this.firstMile=firstMile;
         this.lastMile=lastMile;
@@ -34,8 +37,11 @@ public class DirectionRoute extends Application {
     }
     public PolylineOptions generateRoute(){
         PolylineOptions firstmileroute = getDirectionsURLwithMode(firstMile,lastMile,"WALKING");
-        firstmileroute.width(5).color(Color.RED);
+        firstmileroute.width(25).color(Color.RED).geodesic(true);;
         return firstmileroute;
+    }
+    public List<LatLng> getLocationlist(){
+        return locationlist;
     }
 
 
@@ -81,7 +87,7 @@ public class DirectionRoute extends Application {
     }
 
     private PolylineOptions buildPolyLine(JSONObject jsonObject) throws JSONException {
-        List<LatLng> locationlist = new ArrayList<LatLng>();
+        locationlist = new ArrayList<LatLng>();
         JSONArray routes = jsonObject.getJSONArray("routes");
         JSONObject zero = routes.getJSONObject(0);
         JSONArray legs = zero.getJSONArray("legs");
