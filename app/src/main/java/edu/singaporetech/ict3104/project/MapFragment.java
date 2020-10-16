@@ -224,7 +224,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 mMap.clear();
                                 selectedLocation=new LatLng(arg0.latitude,arg0.longitude);
                                 markerOptions = new MarkerOptions().position(selectedLocation).title("Selected Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
-                                myMarker=mMap.addMarker(markerOptions);
+                                mMap.addMarker(markerOptions);
                                 setStartJourneyButton(true);
                             }})
                         .setNegativeButton(android.R.string.no, null).show();
@@ -330,7 +330,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
     private void startJourney(){
         if (selectedLocation != null) {
-            new AlertDialog.Builder(getContext()).setTitle("Start Journey?").setMessage("You would have to reset map if you wish to change destination?").setIcon(android.R.drawable.ic_dialog_alert)
+            new AlertDialog.Builder(getContext()).setTitle("Start Journey??").setMessage("You would have to reset map if you wish to change destination?").setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();

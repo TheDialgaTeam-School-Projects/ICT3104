@@ -67,6 +67,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login(String email, String password) {
+        email="yihang@hotmail.com";
+        password="123456";
         final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnFailureListener(this, e -> {

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.esri.arcgisruntime:arcgis-android-toolkit:100.9.0@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fed4be433bbd93550a3b4bb5f500ed6b/jetified-arcgis-android-toolkit-100.9.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fed4be433bbd93550a3b4bb5f500ed6b/jetified-arcgis-android-toolkit-100.9.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fed4be433bbd93550a3b4bb5f500ed6b/jetified-arcgis-android-toolkit-100.9.0/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
