@@ -104,12 +104,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void run() {
                 if(lastKnownLocation!=null && R1!=null){
-                    bdccGeoDistanceAlgorithm ba = new bdccGeoDistanceAlgorithm(lastKnownLocation,R1.getLocationlist());
-                    if(ba.bdccGeoDistanceCheckWithRadius(70)){
-//                        Log.d("test","You are getting too far");
-                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
-
-                    }
+//                    bdccGeoDistanceAlgorithm ba = new bdccGeoDistanceAlgorithm(lastKnownLocation,R1.getLocationlist());
+//                    if(ba.bdccGeoDistanceCheckWithRadius(70)){
+////                        Log.d("test","You are getting too far");
+//                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
+//
+//                    }
                     Log.d("test","test");
                 }
                 new Handler().postDelayed(runnable,5000);
@@ -138,6 +138,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if (myMarker!=null){
                     mMap.clear();
                 }
+                clearPath();
                 setStartJourneyButton(false);
                 CreateMarkers(populateListofNearbyPlaces());
             }
@@ -239,7 +240,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         for (int i =0; i<description.size(); i++){
             Places t = description.get(i);
             LatLng sl = new LatLng(t.getLatitude(), t.getLongitude());
-            clearPath();
             MarkerOptions tmarkerOptions = new MarkerOptions().position(sl).title(t.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
             listofmarker.add(mMap.addMarker(tmarkerOptions));
         }

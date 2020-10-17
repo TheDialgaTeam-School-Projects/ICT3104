@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +30,7 @@ public class DirectionRoute extends Application {
     LatLng lastMile;
     String key;
     String mode;
-    List<LatLng>locationlist;
+    List<LocationSteps> location_step_list;
     public DirectionRoute(LatLng firstMile, LatLng lastMile, String key){
         this.firstMile=firstMile;
         this.lastMile=lastMile;
@@ -37,11 +38,11 @@ public class DirectionRoute extends Application {
     }
     public PolylineOptions generateRoute(){
         PolylineOptions firstmileroute = getDirectionsURLwithMode(firstMile,lastMile,"WALKING");
-        firstmileroute.width(25).color(Color.RED).geodesic(true);;
+        firstmileroute.width(10).color(Color.RED).geodesic(true);
         return firstmileroute;
     }
-    public List<LatLng> getLocationlist(){
-        return locationlist;
+    public List<LocationSteps> getLocationStepList(){
+        return location_step_list;
     }
 
 
@@ -58,6 +59,7 @@ public class DirectionRoute extends Application {
         return buildPolylinefromDirectionsURL("https://maps.googleapis.com/maps/api/directions/json?".concat(params));
     }
     //returns a polylineOption
+    //GETTING THE JSON FROM INPUT STREAM
     private PolylineOptions buildPolylinefromDirectionsURL(String url) {
         PolylineOptions polylineoption = new PolylineOptions();
         try {
@@ -85,9 +87,9 @@ public class DirectionRoute extends Application {
         }
         return polylineoption;
     }
-
+    //DO SMT TO THE JSON RESULT
     private PolylineOptions buildPolyLine(JSONObject jsonObject) throws JSONException {
-        locationlist = new ArrayList<LatLng>();
+        location_step_list = new ArrayList<>();
         JSONArray routes = jsonObject.getJSONArray("routes");
         JSONObject zero = routes.getJSONObject(0);
         JSONArray legs = zero.getJSONArray("legs");
@@ -95,32 +97,30 @@ public class DirectionRoute extends Application {
         JSONArray steps = zerotwo.getJSONArray("steps");
         for (int i=0; i<steps.length();i++){
             JSONObject obj = steps.getJSONObject(i);
-            JSONObject end_location= obj.getJSONObject("end_location");
             JSONObject start_location= obj.getJSONObject("start_location");
-            //String PT = obj.getString("NUMBER");
-            //String title = "PT: " + PT;
-            if(i==0){
-                Double StartLAT = start_location.getDouble("lat");
-                Double StartLNG = start_location.getDouble("lng");
-                LatLng position = new LatLng(StartLAT, StartLNG);
-                locationlist.add(position);
-            }
-            Double StartLAT = end_location.getDouble("lat");
-            Double StartLNG = end_location.getDouble("lng");
-            LatLng position = new LatLng(StartLAT, StartLNG);
-            locationlist.add(position);
+            JSONObject end_location= obj.getJSONObject("end_location");
+            LatLng start_loc=new LatLng(start_location.getDouble("lat"),start_location.getDouble("lng"));
+            LatLng end_loc=new LatLng(end_location.getDouble("lat"),end_location.getDouble("lng"));
 
+            location_step_list.add(new LocationSteps(
+                    obj.getJSONObject("duration").getInt("value"),
+                    start_loc,
+                    end_loc,
+                    obj.getJSONObject("distance").getInt("value"),
+                    obj.getString("html_instructions"),
+                    obj.getJSONObject("polyline").getString("points")));
 
         }
-        return buildPolyLineOptionfromListofLatLng(locationlist);
-        //return locationlist;
+        return buildPolyLineOptionfromListofLatLng(location_step_list);
 
     }
-    private PolylineOptions buildPolyLineOptionfromListofLatLng(List<LatLng> input){
+    private PolylineOptions buildPolyLineOptionfromListofLatLng(List<LocationSteps> input){
         PolylineOptions polylineOptions = new PolylineOptions();
-        // Create polyline options with existing LatLng ArrayList
-        polylineOptions.addAll(input);
-        polylineOptions.width(5).color(Color.RED);
+        for(int i=0; i <input.size(); i++){
+            LocationSteps t = input.get(i);
+            polylineOptions.addAll(PolyUtil.decode(t.getPolyline()));
+        }
+        polylineOptions.width(10).color(Color.RED);
         return polylineOptions;
     }
 
