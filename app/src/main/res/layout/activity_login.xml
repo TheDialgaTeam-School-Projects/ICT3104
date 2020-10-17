@@ -7,49 +7,72 @@
     tools:context=".LoginActivity">
 
     <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:id="@+id/scrollView2"
+        android:layout_width="410dp"
+        android:layout_height="400dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.497">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center">
 
+
+
             <EditText
                 android:id="@+id/editTextLoginEmailAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 android:autofillHints="emailAddress"
+                android:background="@drawable/round"
+                android:drawableStart="@drawable/ic_email"
+
+                android:drawablePadding="16dp"
                 android:ems="10"
                 android:hint="@string/login_email_address"
                 android:inputType="textEmailAddress"
+                android:padding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
                 android:id="@+id/editTextLoginPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
                 android:autofillHints="password"
+                android:background="@drawable/round"
+                android:drawableStart="@drawable/ic_lock"
+                android:drawablePadding="16dp"
                 android:ems="10"
                 android:hint="@string/login_password"
                 android:inputType="textPassword"
+                android:padding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextLoginEmailAddress" />
 
             <Button
                 android:id="@+id/buttonLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/round_bt"
                 android:text="@string/login_login"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextLoginPassword" />
@@ -58,10 +81,10 @@
                 android:id="@+id/textViewSignUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginStart="96dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/login_sign_up"
                 android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
 
@@ -69,12 +92,23 @@
                 android:id="@+id/textViewForgetPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/login_forget_password"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.495"
+                app:layout_constraintStart_toEndOf="@+id/textViewSignUp"
+                app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewSignUp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
