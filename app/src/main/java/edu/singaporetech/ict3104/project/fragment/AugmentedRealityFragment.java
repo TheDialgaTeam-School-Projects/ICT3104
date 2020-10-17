@@ -9,12 +9,20 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.R;
 
 public class AugmentedRealityFragment extends Fragment {
 
+    private PositionSensor positionSensor;
     private FrameLayout frameLayout;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        positionSensor = new PositionSensor(requireContext());
+    }
 
     @Nullable
     @Override
@@ -34,6 +42,18 @@ public class AugmentedRealityFragment extends Fragment {
     public void onDestroyView() {
         frameLayout.removeAllViews();
         super.onDestroyView();
+    }
+
+    @Override
+    public void onResume() {
+        positionSensor.onResume();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        positionSensor.onPause();
+        super.onPause();
     }
 
     @Override
