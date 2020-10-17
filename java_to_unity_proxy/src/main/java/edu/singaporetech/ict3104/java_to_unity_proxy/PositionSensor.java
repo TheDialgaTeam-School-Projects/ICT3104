@@ -5,11 +5,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
 public final class PositionSensor implements SensorEventListener {
-
-    private static final String TAG = PositionSensor.class.getName();
 
     private static final float[] accelerometerReading = new float[3];
     private static final float[] magnetometerReading = new float[3];
@@ -22,13 +19,10 @@ public final class PositionSensor implements SensorEventListener {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     }
 
-    public static float getAzimuthInDegree() {
+    public static float getCurrentAzimuth() {
         SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
         SensorManager.getOrientation(rotationMatrix, orientationAngles);
-        float azimuth = orientationAngles[0];
-        float azimuthInDegree = (float) ((azimuth >= 0) ? azimuth * (180 / Math.PI) : (azimuth * (180 / Math.PI)) + 360);
-        Log.d(TAG, "Current Azimuth (Degree): " + azimuthInDegree);
-        return azimuthInDegree;
+        return orientationAngles[0];
     }
 
     public void onResume() {
@@ -49,9 +43,10 @@ public final class PositionSensor implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        final int sensorType = event.sensor.getType();
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
             System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.length);
-        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+        } else if (sensorType == Sensor.TYPE_MAGNETIC_FIELD) {
             System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.length);
         }
     }
