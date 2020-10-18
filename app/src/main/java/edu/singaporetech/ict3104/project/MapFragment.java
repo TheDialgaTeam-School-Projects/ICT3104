@@ -104,13 +104,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void run() {
                 if(lastKnownLocation!=null && R1!=null){
-//                    bdccGeoDistanceAlgorithm ba = new bdccGeoDistanceAlgorithm(lastKnownLocation,R1.getLocationlist());
-//                    if(ba.bdccGeoDistanceCheckWithRadius(70)){
-////                        Log.d("test","You are getting too far");
-//                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
-//
-//                    }
-                    Log.d("test","test");
+                    if(doInBackground(R1.getLocationStepList())){
+                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Toast.makeText(getActivity(), "You are still on the route", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 new Handler().postDelayed(runnable,5000);
             }
@@ -433,6 +432,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
+    public Boolean doInBackground(List<LocationSteps> input) {
+        //publishProgress();
+        List<LatLng> list = new ArrayList<>();
+        for(int i=0; i<input.size(); i++){
+            list.add(input.get(i).getStart_location());
+            list.add(input.get(i).getEnd_location());
+        }
+        //List<LatLng> list = list[0];
+        getDeviceLocation();
+        LatLng currentPosition = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+        for (int i = 1; i < list.size(); i++) {
+            double t = obtainDistance(currentPosition, list.get(i),'K');
+            if (obtainDistance(currentPosition, list.get(i),'K') <= 0.2) {
+                //AS long as there is one there is within 0.5km Deem okay
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //M for Miles , K for kilometers , N for Nautical Miles
+    private double obtainDistance(LatLng loc1,LatLng loc2, char unit) {
+        double lat1= loc1.latitude ;
+        double lon1= loc1.longitude ;
+        double lat2= loc2.latitude ;
+        double lon2= loc2.longitude ;
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        if (unit == 'K') {
+            dist = dist * 1.609344;
+        } else if (unit == 'N') {
+            dist = dist * 0.8684;
+        }
+        return (dist);
+    }
+
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    /*::  This function converts decimal degrees to radians             :*/
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    /*::  This function converts radians to decimal degrees             :*/
+    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
