@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,16 +35,22 @@ public class LoginActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
 
+    // progress bar
+    ProgressBar Pbar;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        Pbar = (ProgressBar)findViewById(R.id.progressBar);
+
         editTextLoginEmailAddress = findViewById(R.id.editTextLoginEmailAddress);
         editTextLoginPassword = findViewById(R.id.editTextLoginPassword);
 
         sharedPreferences = getSharedPreferences(SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-
+        Pbar.setVisibility(View.GONE);
         editTextLoginEmailAddress.setText(sharedPreferences.getString(EMAIL_ADDRESS_KEY, ""));
         editTextLoginPassword.setText(sharedPreferences.getString(PASSWORD_KEY, ""));
 
@@ -70,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
 
             if (isValid) {
                 login(emailAddress, password);
+                Pbar.setVisibility(View.VISIBLE);
             }
         });
 
