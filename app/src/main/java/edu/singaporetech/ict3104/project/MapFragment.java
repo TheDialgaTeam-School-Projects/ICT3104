@@ -21,6 +21,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.StrictMode;
@@ -29,6 +30,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -46,6 +49,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.location.LocationServices;
+import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,7 +81,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     MarkerOptions markerOptions;
     Marker myMarker;
     List<Marker> listofmarker;
-    Polyline polyline;
+    List<Polyline> polyline;
     boolean locationPermissionGranted = false;
     Location lastKnownLocation;
     LatLng selectedLocation;
@@ -89,6 +93,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     Handler mHandler;
     Runnable runnable;
     DirectionRoute R1;
+    RadioGroup rbg_RouteList;
+    List<List<PolylineOptions>> listofAlternateRoute;
+    int selectedRoute;
 
     public MapFragment() {
         // Required empty public constructor
@@ -100,21 +107,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
        //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                if(lastKnownLocation!=null && R1!=null){
-                    if(doInBackground(R1.getLocationStepList())){
-                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        Toast.makeText(getActivity(), "You are still on the route", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                new Handler().postDelayed(runnable,5000);
-            }
-        };
+//        runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                if(lastKnownLocation!=null && R1!=null){
+//                    if(doInBackground(R1.getLocationStepList())){
+//                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
+//                    }
+//                    else {
+//                        Toast.makeText(getActivity(), "You are still on the route", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//                new Handler().postDelayed(runnable,5000);
+//            }
+//        };
         mHandler = new Handler();
+        rbg_RouteList=rootView.findViewById(R.id.rbg_RouteList);
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
         btnStartRoute = rootView.findViewById(R.id.btnStartRoute);
@@ -137,9 +145,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if (myMarker!=null){
                     mMap.clear();
                 }
+                clearrbgList();
                 clearPath();
                 setStartJourneyButton(false);
                 CreateMarkers(populateListofNearbyPlaces());
+            }
+        });
+        rbg_RouteList.setOnCheckedChangeListener((group, checkedId) -> {
+            // checkedId is the RadioButton selected
+            clearPath();
+            selectedRoute=checkedId-1;
+            List<PolylineOptions> selected = listofAlternateRoute.get(selectedRoute);
+            PolylineOptions t = new PolylineOptions();
+            polyline=new ArrayList<>();
+            for(int i=0; i<selected.size();i++){
+                Polyline tpoly = mMap.addPolyline(selected.get(i));
+                polyline.add(tpoly);
             }
         });
         return rootView;
@@ -171,7 +192,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private void clearPath() {
         if (polyline != null)
-            polyline.remove();
+            for (int i=0; i< polyline.size();i++){
+                polyline.get(i).remove();
+            }
         polyline = null;
     }
 
@@ -226,6 +249,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 markerOptions = new MarkerOptions().position(selectedLocation).title("Selected Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
                                 mMap.addMarker(markerOptions);
                                 setStartJourneyButton(true);
+                                R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
+                                listofAlternateRoute=R1.getRouteList();
+                                for (int j = 1; j <= listofAlternateRoute.size() ; j++) {
+                                    RadioButton rbn = new RadioButton(getContext());
+                                    rbn.setId(j);
+                                    rbn.setText("Route " + j);
+                                    rbg_RouteList.addView(rbn);
+                                }
                             }})
                         .setNegativeButton(android.R.string.no, null).show();
 
@@ -254,6 +285,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 mMap.addMarker(new MarkerOptions().position(t.getPosition()).title(t.getTitle()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
                 selectedLocation=marker.getPosition();
                 setStartJourneyButton(true);
+                clearrbgList();
+                R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
+                listofAlternateRoute=R1.getRouteList();
+                for (int j = 1; j <= listofAlternateRoute.size() ; j++) {
+                    RadioButton rbn = new RadioButton(getContext());
+                    rbn.setId(j);
+                    rbn.setText("Route " + j);
+                    rbg_RouteList.addView(rbn);
+                }
             }
 
         }
@@ -335,11 +375,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
                         R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
                         clearPath();
-                        PolylineOptions options = R1.generateRoute();
                         mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(selectedLocation).title("selectedLocation").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
-                        polyline = mMap.addPolyline(options);
+                       // polyline = mMap.addPolyline(options);
                         setStartJourneyButton(false);
+                        List<List<LocationSteps>> list = R1.getLocationStepList();
+                        //Pass to AR FROM HERE
+                        List<LocationSteps> selectroute =list.get(selectedRoute);
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
         }
@@ -423,6 +465,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
         }
 
+    }
+
+    public void clearrbgList(){
+        for (int i=0; i< rbg_RouteList.getChildCount(); i++){
+            rbg_RouteList.removeViewAt(i);
+        }
     }
     private void setStartJourneyButton(boolean t){
         if(t){

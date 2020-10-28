@@ -7,7 +7,10 @@ import android.net.Uri;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
@@ -30,25 +33,27 @@ public class DirectionRoute extends Application {
     LatLng lastMile;
     String key;
     String mode;
-    List<LocationSteps> location_step_list;
+    List<List<LocationSteps>> location_step_list;
+    List<List<PolylineOptions>> wholeList;
     public DirectionRoute(LatLng firstMile, LatLng lastMile, String key){
         this.firstMile=firstMile;
         this.lastMile=lastMile;
         this.key=key;
+        this.getAlternateRoute();
     }
-    public PolylineOptions generateRoute(){
-        PolylineOptions firstmileroute = getDirectionsURLwithMode(firstMile,lastMile,"WALKING");
-        firstmileroute.width(10).color(Color.RED).geodesic(true);
-        return firstmileroute;
+    public List<List<PolylineOptions>> getRouteList(){
+        return wholeList;
     }
-    public List<LocationSteps> getLocationStepList(){
+    public List<List<LocationSteps>> getLocationStepList(){
         return location_step_list;
     }
+    public void getAlternateRoute(){
+        getListOfPolyLineFromAlternative("Walking");
+    }
 
-
-    private PolylineOptions getDirectionsURLwithMode(LatLng from, LatLng to,String modeselection){
-        String origin = "origin=" + from.latitude + "," + from.longitude+"&";
-        String dest = "destination=" + to.latitude + "," + to.longitude+"&";
+    private void getListOfPolyLineFromAlternative(String modeselection){
+        String origin = "origin=" + firstMile.latitude + "," + firstMile.longitude+"&";
+        String dest = "destination=" + lastMile.latitude + "," + lastMile.longitude+"&";
         String key = "key=" +this.key;
         String sensor = "sensor=false"+"&";
         String mode = "mode="+modeselection+"&";
@@ -56,12 +61,12 @@ public class DirectionRoute extends Application {
         String avoid = "avoid=highways"+"&";
         String params = origin.concat(dest).concat(avoid).concat(mode).concat(alternative).concat(key);
         // return "https://maps.googleapis.com/maps/api/directions/json?".concat(params);
-        return buildPolylinefromDirectionsURL("https://maps.googleapis.com/maps/api/directions/json?".concat(params));
+        buildListofPolylinefromDirectionsURL("https://maps.googleapis.com/maps/api/directions/json?".concat(params));
     }
-    //returns a polylineOption
-    //GETTING THE JSON FROM INPUT STREAM
-    private PolylineOptions buildPolylinefromDirectionsURL(String url) {
-        PolylineOptions polylineoption = new PolylineOptions();
+    private void buildListofPolylinefromDirectionsURL(String url) {
+        location_step_list=new ArrayList<>();
+        wholeList= new ArrayList<>();
+        List<LocationSteps> tlist = new ArrayList<>();
         try {
             URL url2 = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
@@ -76,8 +81,32 @@ public class DirectionRoute extends Application {
                 //string to Json Object
                 String response =responseStrBuilder.toString();
                 JSONObject jsonObject = new JSONObject(response);
-                polylineoption = buildPolyLine(jsonObject);
-                //addPolyLine(pointlist);
+                JSONArray routes = jsonObject.getJSONArray("routes");
+                for(int i=0; i< routes.length();i++){
+                    List<PolylineOptions> listpolyline = new ArrayList<>();
+                    List<LocationSteps> listlocationstep = new ArrayList<>();
+                    JSONObject routeobject = routes.getJSONObject(i);
+                    JSONObject zero = routes.getJSONObject(i);
+                    JSONArray legs = zero.getJSONArray("legs");
+                    JSONObject zerotwo = legs.getJSONObject(0);
+                    JSONArray steps = zerotwo.getJSONArray("steps");
+                    for(int j=0; j<steps.length();j++){
+                        PolylineOptions polylineoption = new PolylineOptions();
+                        String poly = steps.getJSONObject(j).getJSONObject("polyline").getString("points");
+                        polylineoption.addAll(PolyUtil.decode(poly));
+                        listpolyline.add(polylineoption);
+
+                        JSONObject obj = steps.getJSONObject(i);
+                        JSONObject start_location= obj.getJSONObject("start_location");
+                        JSONObject end_location= obj.getJSONObject("end_location");
+                        LatLng start_loc=new LatLng(start_location.getDouble("lat"),start_location.getDouble("lng"));
+                        LatLng end_loc=new LatLng(end_location.getDouble("lat"),end_location.getDouble("lng"));
+                        listlocationstep.add(new LocationSteps(obj.getJSONObject("duration").getInt("value"),start_loc,end_loc,obj.getJSONObject("distance").getInt("value"),obj.getString("html_instructions"),obj.getJSONObject("polyline").getString("points")));
+
+                    }
+                    location_step_list.add(tlist);
+                    wholeList.add(listpolyline);
+                }
 
             } finally {
                 connection.disconnect();
@@ -85,44 +114,18 @@ public class DirectionRoute extends Application {
         }catch (IOException | JSONException e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        return polylineoption;
+        //return wholeList;
     }
-    //DO SMT TO THE JSON RESULT
-    private PolylineOptions buildPolyLine(JSONObject jsonObject) throws JSONException {
-        location_step_list = new ArrayList<>();
-        JSONArray routes = jsonObject.getJSONArray("routes");
-        JSONObject zero = routes.getJSONObject(0);
-        JSONArray legs = zero.getJSONArray("legs");
-        JSONObject zerotwo = legs.getJSONObject(0);
-        JSONArray steps = zerotwo.getJSONArray("steps");
-        for (int i=0; i<steps.length();i++){
-            JSONObject obj = steps.getJSONObject(i);
-            JSONObject start_location= obj.getJSONObject("start_location");
-            JSONObject end_location= obj.getJSONObject("end_location");
-            LatLng start_loc=new LatLng(start_location.getDouble("lat"),start_location.getDouble("lng"));
-            LatLng end_loc=new LatLng(end_location.getDouble("lat"),end_location.getDouble("lng"));
 
-            location_step_list.add(new LocationSteps(
-                    obj.getJSONObject("duration").getInt("value"),
-                    start_loc,
-                    end_loc,
-                    obj.getJSONObject("distance").getInt("value"),
-                    obj.getString("html_instructions"),
-                    obj.getJSONObject("polyline").getString("points")));
-
-        }
-        return buildPolyLineOptionfromListofLatLng(location_step_list);
-
-    }
-    private PolylineOptions buildPolyLineOptionfromListofLatLng(List<LocationSteps> input){
-        PolylineOptions polylineOptions = new PolylineOptions();
-        for(int i=0; i <input.size(); i++){
-            LocationSteps t = input.get(i);
-            polylineOptions.addAll(PolyUtil.decode(t.getPolyline()));
-        }
-        polylineOptions.width(10).color(Color.RED);
-        return polylineOptions;
-    }
+//    private PolylineOptions buildPolyLineOptionfromListofLatLng(List<LocationSteps> input){
+//        PolylineOptions polylineOptions = new PolylineOptions();
+//        for(int i=0; i <input.size(); i++){
+//            LocationSteps t = input.get(i);
+//            polylineOptions.addAll(PolyUtil.decode(t.getPolyline()));
+//        }
+//        polylineOptions.width(10).color(Color.RED);
+//        return polylineOptions;
+//    }
 
 
 
