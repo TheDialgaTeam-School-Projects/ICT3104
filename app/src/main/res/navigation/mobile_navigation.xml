@@ -30,6 +30,7 @@
         android:name="edu.singaporetech.ict3104.project.fragment.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings" />
+
     <fragment
         android:id="@+id/agumentedRealityFragment"
         android:name="edu.singaporetech.ict3104.project.fragment.AugmentedRealityFragment"
@@ -43,4 +44,12 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_planner"
+        android:name="edu.singaporetech.ict3104.project.fragment.AchievementsFragment"
+        android:label="@string/nav_planner"
+        tools:layout="@layout/fragment_planner" />
+
+
 </navigation>
