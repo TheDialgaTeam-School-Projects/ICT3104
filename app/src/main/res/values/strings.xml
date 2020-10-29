@@ -21,6 +21,7 @@
     <string name="nav_home">Home</string>
     <string name="nav_achievements">Achievements</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_planner">Planner</string>
     <string name="settings_username">Username:</string>
     <string name="settings_commute_method">Commute Method:</string>
     <string name="settings_save">Save</string>
