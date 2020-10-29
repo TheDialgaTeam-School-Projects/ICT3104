@@ -12,16 +12,23 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import edu.singaporetech.ict3104.project.LoginActivity;
+import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
@@ -32,6 +39,8 @@ public class SettingsFragment extends Fragment {
 
     private final ArrayList<String> commuteMethods = new ArrayList<>();
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    String commuteType;
     private String email;
 
     private TextView textViewSettingsUsername;
@@ -61,8 +70,35 @@ public class SettingsFragment extends Fragment {
             Toast.makeText(getContext(), "Unexpected error with the user.", Toast.LENGTH_LONG).show();
             startActivity(new Intent(getContext(), LoginActivity.class));
         }
+
+
+        //Toast.makeText(getContext(),commuteType,Toast.LENGTH_LONG).show();
+
+        //read commute method from user in fb
+
     }
 
+    public void getCommuteMethod(String username) {
+        DocumentReference docRef = db.collection("Users").document(username);
+        docRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            commuteType = documentSnapshot.getString("Commute Type");
+                            System.out.println("LET GOOOOOOOOOOOOOOO : " + commuteType);
+                        } else {
+                            // Toast.makeText(MainActivity.this, "Document does not exist", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -78,22 +114,36 @@ public class SettingsFragment extends Fragment {
         spinnerSettingsCommuteMethod = view.findViewById(R.id.spinnerSettingsCommuteMethod);
         spinnerSettingsCommuteMethod.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, commuteMethods));
 
+        //instantiate and declare
         final Button buttonSettingsSave = view.findViewById(R.id.buttonSettingsSave);
+        //On click save
         buttonSettingsSave.setOnClickListener(v -> {
-            final HashMap<String, Object> userData = new HashMap<>();
-            userData.put("Commute Type", spinnerSettingsCommuteMethod.getSelectedItem());
+            DocumentReference docRef = db.collection("Users").document(email);
+            Map<String, Object> data = new HashMap<>();
 
-            FireStoreHelper.setOrUpdateUserData(email, userData)
-                    .addOnFailureListener(requireActivity(), e -> {
-                        Log.e(SettingsFragment.class.getName(), "Unable to save user data.", e);
-                        Toast.makeText(requireActivity(), "Unable to save user data.", Toast.LENGTH_SHORT).show();
+            data.put("Commute Type", spinnerSettingsCommuteMethod.getSelectedItem().toString());
+
+            docRef.update(data)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("string", "onSuccess: yay, updated the doc");
+                            Toast.makeText(requireActivity(),"Updated Successfully",Toast.LENGTH_SHORT).show();
+                        }
+
                     })
-                    .addOnSuccessListener(requireActivity(), aVoid -> {
-                        Toast.makeText(requireActivity(), "Successfully saved user data.", Toast.LENGTH_SHORT).show();
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(requireActivity(),"Failed to Update",Toast.LENGTH_SHORT).show();
+
+                        }
                     });
         });
 
+        //instantiate and declare
         Button buttonSettingsLogout = view.findViewById(R.id.buttonSettingsLogout);
+        //On click signout
         buttonSettingsLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(requireContext(), LoginActivity.class));
