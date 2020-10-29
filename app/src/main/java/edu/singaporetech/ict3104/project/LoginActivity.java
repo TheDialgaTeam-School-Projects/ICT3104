@@ -123,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                             .putString(EMAIL_ADDRESS_KEY, email)
                             .putString(PASSWORD_KEY, password)
                             .apply();
-                    startActivity(new Intent(this, PlannerMainActivity.class));
+                    startActivity(new Intent(this, MainActivity.class));
                 });
     }
 }

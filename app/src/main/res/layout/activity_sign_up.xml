@@ -110,23 +110,10 @@
                 android:id="@+id/spinnerSignUpCommuteMethod"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="@+id/textView"
                 app:layout_constraintStart_toStartOf="@+id/textView"
                 app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-            <EditText
-                android:id="@+id/editTextCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:autofillHints=""
-                android:ems="10"
-                android:hint="@string/code"
-                android:inputType="text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerSignUpCommuteMethod" />
 
             <Button
                 android:id="@+id/buttonSignUp"
@@ -137,8 +124,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextCode" />
-
+                app:layout_constraintTop_toBottomOf="@+id/spinnerSignUpCommuteMethod" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
