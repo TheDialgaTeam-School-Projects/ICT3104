@@ -17,7 +17,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".CommuteMainActivity"
+            android:label="@string/main_label" />
+        <activity
+            android:name=".PlannerMainActivity"
             android:label="@string/main_label" />
         <activity
             android:name=".ForgetPasswordActivity"
