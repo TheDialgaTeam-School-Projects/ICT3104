@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.commute_activity_main);
+        setContentView(R.layout.activity_main);
 
         final BottomNavigationView navView = findViewById(R.id.nav_view);
         final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);

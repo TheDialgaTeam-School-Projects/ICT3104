@@ -3,27 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/navigation_home">
+    app:startDestination="@id/navigation_map">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="edu.singaporetech.ict3104.project.fragment.HomeFragment"
-        android:label="@string/nav_home"
-        tools:layout="@layout/fragment_home" >
+        android:id="@+id/navigation_map"
+        android:name="edu.singaporetech.ict3104.project.fragment.MapFragment"
+        android:label="@string/nav_map">
         <action
-            android:id="@+id/action_navigation_home_to_agumentedRealityFragment"
-            app:destination="@id/agumentedRealityFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            android:id="@+id/action_navigation_map_to_augmentedRealityFragment"
+            app:destination="@id/augmentedRealityFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/navigation_achievements"
-        android:name="edu.singaporetech.ict3104.project.fragment.AchievementsFragment"
-        android:label="@string/nav_achievements"
-        tools:layout="@layout/fragment_achievements" />
 
     <fragment
         android:id="@+id/navigation_settings"
@@ -32,28 +21,13 @@
         tools:layout="@layout/fragment_settings" />
 
     <fragment
-        android:id="@+id/agumentedRealityFragment"
+        android:id="@+id/augmentedRealityFragment"
         android:name="edu.singaporetech.ict3104.project.fragment.AugmentedRealityFragment"
-        android:label="fragment_agumented_reality"
-        tools:layout="@layout/fragment_augmented_reality" >
+        android:label="fragment_augmented_reality"
+        tools:layout="@layout/fragment_augmented_reality">
         <action
-            android:id="@+id/action_agumentedRealityFragment_to_navigation_home"
-            app:destination="@id/navigation_home"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            android:id="@+id/action_augmentedRealityFragment_to_navigation_map"
+            app:destination="@id/navigation_map" />
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_planner"
-        android:name="edu.singaporetech.ict3104.project.fragment.AchievementsFragment"
-        android:label="@string/nav_planner"
-        tools:layout="@layout/fragment_planner" />
-
-    <fragment
-        android:id="@+id/navigation_map"
-        android:name="edu.singaporetech.ict3104.project.MapFragment"
-        android:label="@string/nav_map"
-        tools:layout="@layout/fragment_map" />
 </navigation>

@@ -22,24 +22,32 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="required" />
+
         <activity
-            android:name=".CommuteMainActivity"
+            android:name=".MainActivity"
             android:label="@string/main_label" />
+
         <activity
             android:name=".PlannerMainActivity"
             android:label="@string/main_label" />
+
         <activity
             android:name=".ForgetPasswordActivity"
             android:label="@string/forget_password_label" />
+
         <activity
             android:name=".SignUpActivity"
             android:label="@string/sign_up_label" />
+
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <meta-data android:name="com.google.ar.core" android:value="required" />
+
     </application>
 </manifest>

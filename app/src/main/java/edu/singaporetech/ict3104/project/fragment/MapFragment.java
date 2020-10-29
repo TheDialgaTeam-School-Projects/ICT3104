@@ -1,4 +1,4 @@
-package edu.singaporetech.ict3104.project;
+package edu.singaporetech.ict3104.project.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -22,6 +22,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
+import edu.singaporetech.ict3104.project.DirectionRoute;
+import edu.singaporetech.ict3104.project.LocationSteps;
+import edu.singaporetech.ict3104.project.Places;
+import edu.singaporetech.ict3104.project.R;
 
 import android.os.Handler;
 import android.os.StrictMode;
