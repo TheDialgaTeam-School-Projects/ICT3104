@@ -33,7 +33,7 @@ import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    String FBCode;
+    String FireBaseCode;
 
     private static final String TAG = SignUpActivity.class.getName();
 
@@ -125,7 +125,7 @@ public class SignUpActivity extends AppCompatActivity {
                 data.put("Age", age);
                 data.put("Gender", gender);
                 data.put("Commute Type", commuteMethod);
-                if (code != FBCode)
+                if (code != FireBaseCode)
                 {
                     data.put("Role", "F");
                 }
