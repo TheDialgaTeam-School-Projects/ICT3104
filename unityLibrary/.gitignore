@@ -216,3 +216,4 @@ fabric.properties
 
 # Unity Assets
 !/src/main/assets/bin/
+!/libs/*.aar
