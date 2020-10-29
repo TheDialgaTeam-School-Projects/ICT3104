@@ -108,8 +108,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login(String email, String password) {
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                .addOnFailureListener(this, e -> {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)                .addOnFailureListener(this, e -> {
                     if (e instanceof FirebaseAuthInvalidUserException) {
                         Log.e(TAG, e.getMessage(), e);
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();

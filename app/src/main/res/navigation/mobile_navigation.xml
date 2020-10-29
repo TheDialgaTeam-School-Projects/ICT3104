@@ -51,5 +51,9 @@
         android:label="@string/nav_planner"
         tools:layout="@layout/fragment_planner" />
 
-
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="edu.singaporetech.ict3104.project.MapFragment"
+        android:label="@string/nav_map"
+        tools:layout="@layout/fragment_map" />
 </navigation>
