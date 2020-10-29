@@ -13,7 +13,6 @@ import com.google.firebase.auth.FirebaseUser;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import edu.singaporetech.ict3104.project.LoginActivity;
 import edu.singaporetech.ict3104.project.R;

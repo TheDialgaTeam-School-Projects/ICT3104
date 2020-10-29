@@ -12,7 +12,40 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Included by Unity
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+        // End Included by Unity
     }
+
+    // Included by Unity
+    aaptOptions {
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb']
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    packagingOptions {
+        doNotStrip '*/armeabi-v7a/*.so'
+        doNotStrip '*/arm64-v8a/*.so'
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+    // End Included by Unity
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -26,21 +59,24 @@ android {
         }
     }
 }
-//For Marker and Polylines
-apply plugin: 'com.google.gms.google-services'
 dependencies {
+    // Included by Unity
+    implementation project(':unityLibrary')
+    implementation project(path: ':java_to_unity_proxy')
+    implementation fileTree(dir: "${project(':unityLibrary').projectDir}/libs", include: ["*.jar"])
+    // End Included by Unity
+    
     implementation fileTree(dir: "libs", include: ["*.jar"])
+
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'com.google.firebase:firebase-auth:20.0.0'
     implementation 'com.google.firebase:firebase-firestore:22.0.0'
     implementation 'androidx.navigation:navigation-fragment:2.3.1'
     implementation 'androidx.navigation:navigation-ui:2.3.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.ar:core:1.20.0'
 
     testImplementation 'junit:junit:4.13.1'
 
