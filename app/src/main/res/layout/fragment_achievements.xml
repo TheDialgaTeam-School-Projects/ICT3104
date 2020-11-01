@@ -3,4 +3,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="edu.singaporetech.ict3104.project.fragment.AchievementsFragment"/>
+    tools:context="edu.singaporetech.ict3104.project.fragment.AchievementsFragment">
+
+    <TextView
+        android:id="@+id/feature_name"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="left"
+        android:text="Feature Name"
+        android:padding="5dp"
+        android:layout_marginLeft="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/feature_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="Rating"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:layout_marginLeft="20dp"
+        app:layout_constraintStart_toEndOf="@+id/feature_name"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:id="@+id/feature_age"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="Age"
+        android:padding="5dp"
+        android:layout_marginLeft="10dp"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/feature_rating"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:id="@+id/gender"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="Gender"
+        android:padding="5dp"
+        android:layout_marginLeft="10dp"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/feature_age"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:id="@+id/commute_method"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="Method"
+        android:layout_marginLeft="10dp"
+        android:padding="5dp"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@+id/gender"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <ListView
+        android:id="@+id/planner_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp">
+
+    </ListView>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
