@@ -6,7 +6,7 @@
     tools:context="edu.singaporetech.ict3104.project.fragment.AchievementsFragment">
 
     <TextView
-        android:id="@+id/feature_name"
+        android:id="@+id/heading_name"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="left"
@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/feature_rating"
+        android:id="@+id/heading_rating"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="center"
@@ -25,12 +25,12 @@
         android:textAlignment="center"
         android:padding="5dp"
         android:layout_marginLeft="20dp"
-        app:layout_constraintStart_toEndOf="@+id/feature_name"
+        app:layout_constraintStart_toEndOf="@+id/heading_name"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteY="0dp" />
 
     <TextView
-        android:id="@+id/feature_age"
+        android:id="@+id/heading_age"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="center"
@@ -38,12 +38,12 @@
         android:padding="5dp"
         android:layout_marginLeft="10dp"
         android:textAlignment="center"
-        app:layout_constraintStart_toEndOf="@+id/feature_rating"
+        app:layout_constraintStart_toEndOf="@+id/heading_rating"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteY="0dp" />
 
     <TextView
-        android:id="@+id/gender"
+        android:id="@+id/heading_gender"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="center"
@@ -51,12 +51,12 @@
         android:padding="5dp"
         android:layout_marginLeft="10dp"
         android:textAlignment="center"
-        app:layout_constraintStart_toEndOf="@+id/feature_age"
+        app:layout_constraintStart_toEndOf="@+id/heading_age"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteY="0dp" />
 
     <TextView
-        android:id="@+id/commute_method"
+        android:id="@+id/heading_method"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="center"
@@ -64,7 +64,7 @@
         android:layout_marginLeft="10dp"
         android:padding="5dp"
         android:textAlignment="center"
-        app:layout_constraintStart_toEndOf="@+id/gender"
+        app:layout_constraintStart_toEndOf="@+id/heading_gender"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteY="0dp" />
 

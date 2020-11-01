@@ -1,6 +1,8 @@
 package edu.singaporetech.ict3104.project.fragment;
 
-public class feature {
+import java.util.Collections;
+
+public class feature{
      String feature_name;
      int feature_rating;
      int user_age;
@@ -48,5 +50,8 @@ public class feature {
     public void setUser_method(char user_method){
         this.user_method = user_method;
     }
+
+
+
 
 }
