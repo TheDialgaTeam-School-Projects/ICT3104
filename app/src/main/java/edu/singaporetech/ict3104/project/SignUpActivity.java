@@ -86,7 +86,7 @@ public class SignUpActivity extends AppCompatActivity {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         FireBaseCode = document.getString("Code");
-                        System.out.println(FireBaseCode);
+                        System.out.println("FB FB : " + FireBaseCode);
                     } else {
                         Log.d(TAG, "No such document");
                     }
@@ -145,14 +145,15 @@ public class SignUpActivity extends AppCompatActivity {
                 data.put("Age", age);
                 data.put("Gender", gender);
                 data.put("Commute Type", commuteMethod);
-                System.out.println(FireBaseCode);
-                if (code != FireBaseCode)
+                System.out.println("FB CODE : " + FireBaseCode);
+                System.out.println("USER CODE : " + code);
+                if (code.equals(FireBaseCode))
                 {
-                    data.put("Role", "F");
+                    data.put("Role", "T");
                 }
                 else
                 {
-                    data.put("Role", "T");
+                    data.put("Role", "F");
                 }
                 signUp(emailAddress, password, data);
                 db.collection("Users").document(editTextSignUpEmailAddress.getText().toString().trim()).set(data);
