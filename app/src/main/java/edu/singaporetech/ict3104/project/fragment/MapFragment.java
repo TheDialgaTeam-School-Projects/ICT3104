@@ -1,15 +1,14 @@
 package edu.singaporetech.ict3104.project.fragment;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
+import android.graphics.Point;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,16 +16,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.RecyclerView;
+
 import edu.singaporetech.ict3104.project.DirectionRoute;
 import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.Places;
 import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.PlaceOfInterest;
 
+import android.os.Debug;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
@@ -43,17 +41,19 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.location.LocationServices;
-import com.google.maps.android.PolyUtil;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,9 +68,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -78,7 +75,7 @@ import static android.content.Context.LOCATION_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, LocationListener {
     private static final String TAG = "MapFragment";
     private static final float DEFAULT_ZOOM = 15.0f;
     public static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -100,6 +97,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     RadioGroup rbg_RouteList;
     List<List<PolylineOptions>> listofAlternateRoute;
     int selectedRoute;
+    List<Marker> listofPOIMarker;
+    List<PlaceOfInterest> listofpoi;
 
     public MapFragment() {
         // Required empty public constructor
@@ -108,7 +107,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-       //return inflater.inflate(R.layout.fragment_map, container, false);    }
+        //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
 //        runnable = new Runnable() {
@@ -125,7 +124,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 //                new Handler().postDelayed(runnable,5000);
 //            }
 //        };
-        mHandler = new Handler();
+//        mHandler = new Handler();
+        getAllPOIfromdb();
+
+
         rbg_RouteList=rootView.findViewById(R.id.rbg_RouteList);
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
@@ -173,9 +175,72 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
         mMapView.getMapAsync(this);
-        mHandler.postDelayed(runnable,5000);
+//        mHandler.postDelayed(runnable,5000);
         setStartJourneyButton(false);
     }
+    public void getAllPOIfromdb(){
+        listofpoi = new ArrayList<>();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("POI")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String lat = document.getString("Lat");
+                                String lng = document.getString("Long");
+                                String featurename = document.getString("Name");
+                                String tag = document.getString("Item");
+//                                listofpoi.add(new PlaceOfInterest(featurename,Double.parseDouble(lat),Double.parseDouble(lng),tag));
+//                              Log.d("Planner", document.getId() + " => " + document.getData());
+//                              Log.d("PlannerS", document.getId() + " => " + document.getLong("Age"));
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+
+    }
+    @Override
+    public void onLocationChanged(Location newLocation) {
+        Toast.makeText(getActivity(), "Location changed", Toast.LENGTH_SHORT).show();
+
+//        Location center=newLocation;
+//        for (int i =0; i < listofpoi.size(); i ++){
+//            PlaceOfInterest cur = listofpoi.get(i);
+//            Location test = new Location("");//provider name is unnecessary
+//            test.setLatitude(cur.getLatitude());//your coords of course
+//            test.setLongitude(cur.getLongitude());
+//
+//            float distanceInMeters = center.distanceTo(test);
+////            boolean isWithin10km = distanceInMeters < 10000;
+//            if(distanceInMeters < 10000){
+//                LatLng pos = new LatLng(test.getLatitude(),test.getLongitude());
+//                markerOptions = new MarkerOptions().position(pos).title(cur.getFeaturename());
+//                listofPOIMarker.add(mMap.addMarker(markerOptions));
+//
+//            }
+//        }
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -406,6 +471,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
         try {
             if (locationPermissionGranted) {
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
@@ -448,7 +514,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
         } else {
             ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
@@ -459,6 +525,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
          * cases when a location is not available.
          */
         if (locationPermissionGranted) {
+
 
                 @SuppressLint("MissingPermission") Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
@@ -547,10 +614,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+
         locationPermissionGranted = false;
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
                 locationPermissionGranted = true;
             } else {
                 getLocationPermission();
