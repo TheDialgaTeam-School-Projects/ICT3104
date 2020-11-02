@@ -30,27 +30,22 @@ public class LoginActivity extends AppCompatActivity {
     private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
     private static final String PASSWORD_KEY = "PASSWORD_KEY";
 
+    private ProgressBar progressBar;
     private EditText editTextLoginEmailAddress;
     private EditText editTextLoginPassword;
-
     private SharedPreferences sharedPreferences;
-
-    // progress bar
-    ProgressBar Pbar;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Pbar = (ProgressBar)findViewById(R.id.progressBar);
-
+        progressBar = findViewById(R.id.progressBar);
         editTextLoginEmailAddress = findViewById(R.id.editTextLoginEmailAddress);
         editTextLoginPassword = findViewById(R.id.editTextLoginPassword);
 
         sharedPreferences = getSharedPreferences(SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
-        Pbar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
         editTextLoginEmailAddress.setText(sharedPreferences.getString(EMAIL_ADDRESS_KEY, ""));
         editTextLoginPassword.setText(sharedPreferences.getString(PASSWORD_KEY, ""));
 
@@ -78,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
 
             if (isValid) {
                 login(emailAddress, password);
-                Pbar.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
             }
         });
 
@@ -123,7 +118,10 @@ public class LoginActivity extends AppCompatActivity {
                             .putString(EMAIL_ADDRESS_KEY, email)
                             .putString(PASSWORD_KEY, password)
                             .apply();
-                    startActivity(new Intent(this, PlannerMainActivity.class));
+
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.putExtra(MainActivity.INTENT_USER_EMAIL, email);
+                    startActivity(intent);
                 });
     }
 }

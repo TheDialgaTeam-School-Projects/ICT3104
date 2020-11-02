@@ -7,7 +7,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public final class FireStoreHelper {
 
@@ -31,19 +30,24 @@ public final class FireStoreHelper {
                 .collection(USER_DATA_COLLECTION)
                 .document(email);
 
-        final Task<DocumentSnapshot> userDataDocumentSnapshotTask = userDataDocumentReference.get();
+        return userDataDocumentReference.get().continueWithTask(task -> {
+            if (task.isSuccessful()) {
+                final DocumentSnapshot userDataDocumentSnapshot = task.getResult();
+                if (userDataDocumentSnapshot == null)
+                    return Tasks.forException(new NullPointerException());
 
-        try {
-            final DocumentSnapshot userDataDocumentSnapshot = Tasks.await(userDataDocumentSnapshotTask);
-
-            if (userDataDocumentSnapshot.exists()) {
-                return userDataDocumentReference.update(userData);
+                if (userDataDocumentSnapshot.exists()) {
+                    return userDataDocumentReference.update(userData);
+                } else {
+                    return userDataDocumentReference.set(userData);
+                }
+            } else if (task.isCanceled()) {
+                return Tasks.forCanceled();
             } else {
-                return userDataDocumentReference.set(userData);
+                Exception exception = task.getException();
+                return exception == null ? Tasks.forException(new NullPointerException()) : Tasks.forException(exception);
             }
-        } catch (ExecutionException | InterruptedException e) {
-            return Tasks.forException(e);
-        }
+        });
     }
 
 }
