@@ -11,8 +11,10 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -54,8 +56,6 @@ public class SignUpActivity extends AppCompatActivity {
     private Spinner spinnerSignUpCommuteMethod;
     private EditText editTextCode;
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     public SignUpActivity() {
         commuteMethods.add("Walking");
         commuteMethods.add("Wheelchair");
@@ -76,6 +76,26 @@ public class SignUpActivity extends AppCompatActivity {
         spinnerSignUpCommuteMethod.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, commuteMethods));
         editTextCode = findViewById(R.id.editTextCode);
         Button buttonSignUp = findViewById(R.id.buttonSignUp);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("PlannerCode").document("Code");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        FireBaseCode = document.getString("Code");
+                        System.out.println(FireBaseCode);
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
 
         buttonSignUp.setOnClickListener(v -> {
             KeyboardHelper.hideKeyboard(this);
@@ -125,6 +145,7 @@ public class SignUpActivity extends AppCompatActivity {
                 data.put("Age", age);
                 data.put("Gender", gender);
                 data.put("Commute Type", commuteMethod);
+                System.out.println(FireBaseCode);
                 if (code != FireBaseCode)
                 {
                     data.put("Role", "F");
