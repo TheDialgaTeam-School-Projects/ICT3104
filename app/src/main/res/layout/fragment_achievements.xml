@@ -13,6 +13,8 @@
         android:text="Feature Name"
         android:padding="5dp"
         android:layout_marginLeft="20dp"
+        android:onClick="onClick"
+        android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
