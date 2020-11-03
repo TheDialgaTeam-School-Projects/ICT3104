@@ -22,6 +22,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -49,13 +55,8 @@ public class AchievementsFragment extends Fragment {
     private TextView textViewSortFA;
     private TextView textViewSortFG;
     private TextView textViewSortFM;
-
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String email;
-    int feature_iter = 1;
-
-//    private ArrayList<feature> featureList;
-//    private FeatureListAdapter adapter;
 
     public AchievementsFragment() {
 
@@ -65,6 +66,8 @@ public class AchievementsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        final FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
 
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -82,13 +85,19 @@ public class AchievementsFragment extends Fragment {
         }
 
 
-        //Toast.makeText(getContext(),commuteType,Toast.LENGTH_LONG).show();
-
-        //read commute method from user in fb
 
     }
     public void getFeatures(){
         int i = 0;
+
+
+    }
+
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View view = inflater.inflate((R.layout.fragment_achievements), container, false);
+        ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
+
 
         db.collection("Survey")
                 .get()
@@ -96,8 +105,8 @@ public class AchievementsFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            featureList.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-
                                 // for each document
                                 // store into variables
                                 Long getAge = document.getLong("Age");
@@ -106,82 +115,27 @@ public class AchievementsFragment extends Fragment {
                                 String getFeatureN = document.getString("FeatureName");
                                 String getCommuteMethod = document.getString("CommuteMethod");
                                 char getCM_Char = getCommuteMethod.charAt(0);
-                                String getGender = document.getString("CommuteMethod");
+                                String getGender = document.getString("Gender");
                                 char getGender_Char = getCommuteMethod.charAt(0);
                                 Long getFeatureR = document.getLong("FeatureR");
                                 int getFRInt = Math.toIntExact(getFeatureR);
 
-                                //Log.d("Planner", document.getId() + " => " + document.getData());
-                                //System.out.println("PLANNER : " + document.getLong("Age"));
-                                //Log.d("PlannerS", document.getId() + " => " + document.getLong("Age"));
-                                //String featureName = "feature"+feature_iter;
-                               // feature featureObject= new feature(getFeatureN,getFRInt,getAgeInt,getGender_Char,getCM_Char);
-                               // featureList.add(featureObject);
+                                 feature featureObject= new feature(getFeatureN,getFRInt,getAgeInt,getGender_Char,getCM_Char);
+                                 featureList.add(featureObject);
 
-                                feature_iter++;
                             }
+                            ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
+                            FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
+                            mListView.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
 
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
                     }
                 });
-    }
-
-
-
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View view = inflater.inflate((R.layout.fragment_achievements), container, false);
-        ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
-        //read from database
-        getFeatures();
-
-
-        //
-        //Create the feature objects
-        feature feature1 = new feature("lamp", 5, 21, 'M', 'W');
-        feature feature2 = new feature("staircase", 5, 21, 'M', 'W');
-        feature feature3 = new feature("lamp", 4, 25, 'M', 'W');
-        feature feature4 = new feature("staircase", 2, 21, 'F', 'W');
-        feature feature5 = new feature("lamp", 3, 21, 'F', 'W');
-        feature feature6 = new feature("staircase", 4, 21, 'F', 'W');
-        //most likely for loop / interate through firebase data and instantiate new feature
-
-        //add the feature objects to an ArrayList
-
-        featureList.add(feature1);
-        featureList.add(feature2);
-        featureList.add(feature3);
-        featureList.add(feature4);
-        featureList.add(feature5);
-        featureList.add(feature6);
-        // for each feature object in data add in featureList
-
-
-        //sorts by name
-        //Collections.sort(featureList, (o1, o2) -> o1.feature_name.compareTo(o2.feature_name));
-//        textViewSortFN = (TextView) view.findViewById(R.id.heading_name);
-//        textViewSortFN.setOnClickListener(this);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
-        mListView = (ListView) view.findViewById(R.id.planner_listview);
-        mListView.setAdapter(adapter);
 
         return view;
     }
-
-
-//    @Override
-//    public void onClick(View v) {
-//
-//        //implement things
-//        Collections.sort(featureList, (o1, o2) -> o1.feature_name.compareTo(o2.feature_name));
-//        Toast.makeText(requireActivity(), "Sort By Name.", Toast.LENGTH_SHORT).show();
-//        adapter.notifyDataSetChanged();
-//        //reload adapterview
-//
-//
-//    }
-
 
 }
