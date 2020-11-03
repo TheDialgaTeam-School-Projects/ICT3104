@@ -43,6 +43,7 @@ import static android.content.ContentValues.TAG;
 
 public class AchievementsFragment extends Fragment {
 
+    private ArrayList<feature> featureList = new ArrayList<>();
     private TextView textViewSortFN;
     private TextView textViewSortFR;
     private TextView textViewSortFA;
@@ -51,6 +52,8 @@ public class AchievementsFragment extends Fragment {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String email;
+    int feature_iter = 1;
+
 //    private ArrayList<feature> featureList;
 //    private FeatureListAdapter adapter;
 
@@ -85,6 +88,8 @@ public class AchievementsFragment extends Fragment {
 
     }
     public void getFeatures(){
+        int i = 0;
+
         db.collection("Survey")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -92,12 +97,30 @@ public class AchievementsFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Long getAge = document.getLong("Age");
 
-                                Log.d("Planner", document.getId() + " => " + document.getData());
-                                System.out.println("PLANNER : " + document.getLong("Age"));
-                                Log.d("PlannerS", document.getId() + " => " + document.getLong("Age"));
+                                // for each document
+                                // store into variables
+                                Long getAge = document.getLong("Age");
+                                //convert to int
+                                int getAgeInt = Math.toIntExact(getAge);
+                                String getFeatureN = document.getString("FeatureName");
+                                String getCommuteMethod = document.getString("CommuteMethod");
+                                char getCM_Char = getCommuteMethod.charAt(0);
+                                String getGender = document.getString("CommuteMethod");
+                                char getGender_Char = getCommuteMethod.charAt(0);
+                                Long getFeatureR = document.getLong("FeatureR");
+                                int getFRInt = Math.toIntExact(getFeatureR);
+
+                                //Log.d("Planner", document.getId() + " => " + document.getData());
+                                //System.out.println("PLANNER : " + document.getLong("Age"));
+                                //Log.d("PlannerS", document.getId() + " => " + document.getLong("Age"));
+                                //String featureName = "feature"+feature_iter;
+                               // feature featureObject= new feature(getFeatureN,getFRInt,getAgeInt,getGender_Char,getCM_Char);
+                               // featureList.add(featureObject);
+
+                                feature_iter++;
                             }
+
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -114,6 +137,7 @@ public class AchievementsFragment extends Fragment {
         //read from database
         getFeatures();
 
+
         //
         //Create the feature objects
         feature feature1 = new feature("lamp", 5, 21, 'M', 'W');
@@ -125,7 +149,7 @@ public class AchievementsFragment extends Fragment {
         //most likely for loop / interate through firebase data and instantiate new feature
 
         //add the feature objects to an ArrayList
-        ArrayList<feature> featureList = new ArrayList<>();
+
         featureList.add(feature1);
         featureList.add(feature2);
         featureList.add(feature3);
@@ -139,9 +163,7 @@ public class AchievementsFragment extends Fragment {
         //Collections.sort(featureList, (o1, o2) -> o1.feature_name.compareTo(o2.feature_name));
 //        textViewSortFN = (TextView) view.findViewById(R.id.heading_name);
 //        textViewSortFN.setOnClickListener(this);
-
         FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
-
         mListView = (ListView) view.findViewById(R.id.planner_listview);
         mListView.setAdapter(adapter);
 
