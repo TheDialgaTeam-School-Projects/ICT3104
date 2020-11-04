@@ -11,10 +11,17 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +34,8 @@ import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class SignUpActivity extends AppCompatActivity {
+
+    String FireBaseCode;
 
     private static final String TAG = SignUpActivity.class.getName();
 
@@ -45,6 +54,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText editTextSignUpAge;
     private RadioGroup radioGroupSignUpGender;
     private Spinner spinnerSignUpCommuteMethod;
+    private EditText editTextCode;
 
     public SignUpActivity() {
         commuteMethods.add("Walking");
@@ -64,8 +74,29 @@ public class SignUpActivity extends AppCompatActivity {
         radioGroupSignUpGender = findViewById(R.id.radioGroupSignUpGender);
         spinnerSignUpCommuteMethod = findViewById(R.id.spinnerSignUpCommuteMethod);
         spinnerSignUpCommuteMethod.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, commuteMethods));
-
+        editTextCode = findViewById(R.id.editTextCode);
         Button buttonSignUp = findViewById(R.id.buttonSignUp);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("PlannerCode").document("Code");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        FireBaseCode = document.getString("Code");
+                        System.out.println("FB FB : " + FireBaseCode);
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
+
         buttonSignUp.setOnClickListener(v -> {
             KeyboardHelper.hideKeyboard(this);
 
@@ -77,6 +108,7 @@ public class SignUpActivity extends AppCompatActivity {
             final String age = editTextSignUpAge.getText().toString().trim();
             final String gender = ((RadioButton) findViewById(radioGroupSignUpGender.getCheckedRadioButtonId())).getText().toString();
             final String commuteMethod = spinnerSignUpCommuteMethod.getSelectedItem().toString();
+            final String code = editTextCode.getText().toString();
 
             if (emailAddress.isEmpty()) {
                 editTextSignUpEmailAddress.setError("Email address cannot be empty.");
@@ -113,8 +145,18 @@ public class SignUpActivity extends AppCompatActivity {
                 data.put("Age", age);
                 data.put("Gender", gender);
                 data.put("Commute Type", commuteMethod);
-
+                System.out.println("FB CODE : " + FireBaseCode);
+                System.out.println("USER CODE : " + code);
+                if (code.equals(FireBaseCode))
+                {
+                    data.put("Role", "T");
+                }
+                else
+                {
+                    data.put("Role", "F");
+                }
                 signUp(emailAddress, password, data);
+                db.collection("Users").document(editTextSignUpEmailAddress.getText().toString().trim()).set(data);
             }
         });
     }

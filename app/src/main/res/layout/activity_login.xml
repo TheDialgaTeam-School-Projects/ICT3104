@@ -7,22 +7,18 @@
     tools:context=".LoginActivity">
 
     <ScrollView
-        android:id="@+id/scrollView2"
-        android:layout_width="410dp"
-        android:layout_height="400dp"
+        android:id="@+id/scrollViewLogin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.497">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center">
-
-
 
             <EditText
                 android:id="@+id/editTextLoginEmailAddress"
@@ -77,37 +73,46 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editTextLoginPassword" />
 
-            <TextView
-                android:id="@+id/textViewSignUp"
+            <LinearLayout
+                android:id="@+id/linearLayoutLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="96dp"
-                android:layout_marginTop="20dp"
-                android:text="@string/login_sign_up"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
-
-            <TextView
-                android:id="@+id/textViewForgetPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="@string/login_forget_password"
-                android:textSize="18sp"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.495"
-                app:layout_constraintStart_toEndOf="@+id/textViewSignUp"
-                app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonLogin">
+
+                <TextView
+                    android:id="@+id/textViewSignUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:padding="16dp"
+                    android:text="@string/login_sign_up"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/textViewForgetPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:padding="16dp"
+                    android:text="@string/login_forget_password"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSignUp" />
+                app:layout_constraintTop_toBottomOf="@id/linearLayoutLogin" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
