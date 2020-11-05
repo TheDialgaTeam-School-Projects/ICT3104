@@ -9,9 +9,12 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
+import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
 
 public class AugmentedRealityFragment extends Fragment {
 
@@ -33,9 +36,16 @@ public class AugmentedRealityFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        final MainActivity mainActivity = (MainActivity) requireActivity();
+
+        if (!CameraPermissionHelper.hasCameraPermission(mainActivity) || !LocationPermissionHelper.hasLocationPermission(mainActivity)) {
+            Navigation.findNavController(requireActivity(), R.id.nav_view).navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+        }
+
         frameLayout = view.findViewById(R.id.unityLayout);
-        frameLayout.addView(((MainActivity) requireActivity()).getUnityPlayer().getView());
-        ((MainActivity) requireActivity()).getUnityPlayer().resume();
+        frameLayout.addView(mainActivity.getUnityPlayer().getView());
+        mainActivity.getUnityPlayer().resume();
     }
 
     @Override

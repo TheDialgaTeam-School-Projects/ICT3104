@@ -11,18 +11,25 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.unity3d.player.IUnityPlayerLifecycleEvents;
 import com.unity3d.player.UnityPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
+import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
 
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener, IUnityPlayerLifecycleEvents {
 
     public static final String INTENT_USER_EMAIL = "INTENT_USER_EMAIL";
 
     private final FirebaseAuth firebaseAuth;
+
+    public List<LocationSteps> selectedRoute = new ArrayList<>();
 
     protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
 
@@ -46,6 +53,14 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         firebaseAuth.addAuthStateListener(this);
 
         mUnityPlayer = new UnityPlayer(this);
+
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            CameraPermissionHelper.requestCameraPermission(this);
+        }
+
+        if (!LocationPermissionHelper.hasLocationPermission(this)) {
+            LocationPermissionHelper.requestLocationPermission(this);
+        }
     }
 
     // When Unity player unloaded move task to background
@@ -57,6 +72,13 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     // When Unity player quited kill process
     @Override
     public void onUnityPlayerQuitted() {
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        if (firebaseAuth.getCurrentUser() == null) {
+            startActivity(new Intent(this, LoginActivity.class));
+        }
     }
 
     @Override
@@ -115,6 +137,25 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CameraPermissionHelper.CAMERA_PERMISSION_CODE) {
+            if (!CameraPermissionHelper.hasCameraPermission(this)) {
+                if (CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                    CameraPermissionHelper.showRequestPermissionRationale(this);
+                }
+            }
+        } else if (requestCode == LocationPermissionHelper.LOCATION_PERMISSION_CODE) {
+            if (!LocationPermissionHelper.hasLocationPermission(this)) {
+                if (LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                    LocationPermissionHelper.showRequestPermissionRationale(this);
+                }
+            }
+        }
+    }
+
     // This ensures the layout will be correct.
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -157,12 +198,5 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     /*API12*/
     public boolean onGenericMotionEvent(MotionEvent event) {
         return mUnityPlayer.injectEvent(event);
-    }
-
-    @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        if (firebaseAuth.getCurrentUser() == null) {
-            startActivity(new Intent(this, LoginActivity.class));
-        }
     }
 }

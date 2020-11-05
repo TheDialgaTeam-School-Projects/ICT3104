@@ -21,13 +21,17 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
+import edu.singaporetech.ict3104.java_to_unity_proxy.NavigationManager;
 import edu.singaporetech.ict3104.project.DirectionRoute;
 import edu.singaporetech.ict3104.project.LocationSteps;
+import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.Places;
 import edu.singaporetech.ict3104.project.R;
 
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -394,7 +398,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         setStartJourneyButton(false);
                         List<List<LocationSteps>> list = R1.getLocationStepList();
                         //Pass to AR FROM HERE
-                        List<LocationSteps> selectroute =list.get(selectedRoute);
+                        final MainActivity mainActivity = (MainActivity) requireActivity();
+                        mainActivity.selectedRoute = list.get(selectedRoute);
+                        Navigation.findNavController(requireActivity(), R.id.nav_view).navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
         }

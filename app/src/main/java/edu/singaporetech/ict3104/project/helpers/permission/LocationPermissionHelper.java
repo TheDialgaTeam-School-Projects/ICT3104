@@ -2,6 +2,7 @@ package edu.singaporetech.ict3104.project.helpers.permission;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -9,10 +10,11 @@ import android.provider.Settings;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import edu.singaporetech.ict3104.project.R;
 
 public final class LocationPermissionHelper {
 
-    private static final int LOCATION_PERMISSION_CODE = 1;
+    public static final int LOCATION_PERMISSION_CODE = 1;
     private static final String FINE_LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
@@ -28,6 +30,14 @@ public final class LocationPermissionHelper {
     public static boolean shouldShowRequestPermissionRationale(Activity activity) {
         return ActivityCompat.shouldShowRequestPermissionRationale(activity, FINE_LOCATION_PERMISSION) ||
                 ActivityCompat.shouldShowRequestPermissionRationale(activity, COARSE_LOCATION_PERMISSION);
+    }
+
+    public static void showRequestPermissionRationale(Activity activity) {
+        new AlertDialog.Builder(activity).setTitle(R.string.camera_permission_title)
+                .setMessage(R.string.camera_permission_rationale)
+                .setPositiveButton("Ok", (dialog, which) -> requestLocationPermission(activity))
+                .create()
+                .show();
     }
 
     public static void launchPermissionSettings(Activity activity) {
