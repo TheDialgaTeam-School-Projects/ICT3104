@@ -310,14 +310,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         getDeviceLocation();
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
-        LatLng mycurrent = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+        //LatLng mycurrent = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
         List<String> TYPE = new ArrayList<>();
         TYPE.add("bus_station");
         TYPE.add("subway_station");
         TYPE.add("transit_station");
         List<Places> placeslist = new ArrayList<Places>();
         for (int i = 0; i < TYPE.size(); i++) {
-            placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
+            //placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
         }
         return placeslist;
     }
