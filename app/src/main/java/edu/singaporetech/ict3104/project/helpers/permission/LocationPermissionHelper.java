@@ -15,6 +15,7 @@ import edu.singaporetech.ict3104.project.R;
 public final class LocationPermissionHelper {
 
     public static final int LOCATION_PERMISSION_CODE = 1;
+
     private static final String FINE_LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
@@ -38,13 +39,6 @@ public final class LocationPermissionHelper {
                 .setPositiveButton("Ok", (dialog, which) -> requestLocationPermission(activity))
                 .create()
                 .show();
-    }
-
-    public static void launchPermissionSettings(Activity activity) {
-        Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.fromParts("package", activity.getPackageName(), null));
-        activity.startActivity(intent);
     }
 
 }

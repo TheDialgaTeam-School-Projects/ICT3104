@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="edu.singaporetech.ict3104.project.fragment.AchievementsFragment">
+    tools:context="edu.singaporetech.ict3104.project.fragment.PlannerFragment">
 
     <TextView
         android:id="@+id/heading_name"

@@ -2,15 +2,15 @@ package edu.singaporetech.ict3104.project;
 
 import android.os.Bundle;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
+import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-public class PlannerMainActivity extends AppCompatActivity {
+public class PlannerMainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -22,5 +22,5 @@ public class PlannerMainActivity extends AppCompatActivity {
 
         NavigationUI.setupWithNavController(navView, navController);
     }
-    
+
 }

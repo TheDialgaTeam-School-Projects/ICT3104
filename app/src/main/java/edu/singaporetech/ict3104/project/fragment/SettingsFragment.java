@@ -25,6 +25,8 @@ import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
 public class SettingsFragment extends Fragment {
 
+    public static final String INTENT_USER_EMAIL = "INTENT_USER_EMAIL";
+
     private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
     private static final String COMMUTE_METHOD_KEY = "COMMUTE_METHOD_KEY";
 
