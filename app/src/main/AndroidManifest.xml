@@ -28,7 +28,7 @@
             android:value="required" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".UserMainActivity"
             android:label="@string/main_label" />
 
         <activity

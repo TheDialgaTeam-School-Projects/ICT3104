@@ -12,8 +12,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
@@ -24,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import edu.singaporetech.ict3104.project.fragment.SettingsFragment;
 import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -128,27 +127,24 @@ public class LoginActivity extends AppCompatActivity {
 
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     DocumentReference docRef = db.collection("Users").document(email);
-                    docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    FireBaseUserRole = document.getString("Role");
-                                    if (FireBaseUserRole.equals("T"))
-                                    {
-                                        startActivity(new Intent(getApplicationContext(), PlannerMainActivity.class));
-                                    }
-                                    else
-                                    {
-                                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                                    }
-                                } else {
-                                    Log.d(TAG, "No such document");
+                    docRef.get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                FireBaseUserRole = document.getString("Role");
+                                if (FireBaseUserRole.equals("T"))
+                                {
+                                    startActivity(new Intent(getApplicationContext(), PlannerMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
+                                }
+                                else
+                                {
+                                    startActivity(new Intent(getApplicationContext(), UserMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
                                 }
                             } else {
-                                Log.d(TAG, "get failed with ", task.getException());
+                                Log.d(TAG, "No such document");
                             }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
                         }
                     });
                 });

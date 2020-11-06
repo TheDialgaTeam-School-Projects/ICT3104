@@ -61,11 +61,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import edu.singaporetech.ict3104.project.DirectionRoute;
 import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.Places;
 import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -509,7 +511,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
                             //Pass to AR FROM HERE
-                            List<LocationSteps> selectroute = list.get(selectedRoute);
+                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
+                            AugmentedRealityFragment.currentLocationStepIndex = 0;
+                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                             toggleMarkermode();
                         }
                     })

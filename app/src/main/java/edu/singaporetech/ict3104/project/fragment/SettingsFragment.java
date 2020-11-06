@@ -19,7 +19,6 @@ import java.util.HashMap;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import edu.singaporetech.ict3104.project.MainActivity;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
@@ -83,7 +82,7 @@ public class SettingsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        email = requireActivity().getIntent().getStringExtra(MainActivity.INTENT_USER_EMAIL);
+        email = requireActivity().getIntent().getStringExtra(SettingsFragment.INTENT_USER_EMAIL);
 
         if (savedInstanceState != null) {
             textViewSettingsUsername.setText(savedInstanceState.getString(EMAIL_ADDRESS_KEY, ""));

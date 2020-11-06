@@ -12,6 +12,7 @@ import com.unity3d.player.UnityPlayer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
 import edu.singaporetech.ict3104.project.LoginActivity;
 import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
 import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
@@ -32,6 +33,8 @@ public abstract class BaseActivity extends AppCompatActivity implements IUnityPl
     public UnityPlayer getUnityPlayer() {
         return mUnityPlayer;
     }
+
+    public abstract NavController getNavController();
 
     protected String updateUnityCommandLineArguments(String cmdLine) {
         return cmdLine;
