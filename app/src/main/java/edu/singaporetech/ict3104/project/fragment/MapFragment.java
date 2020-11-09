@@ -23,6 +23,7 @@ import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.Places;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.PlaceOfInterest;
+import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
 import android.os.Debug;
 import android.os.Handler;
@@ -31,11 +32,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +72,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -103,7 +108,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     List<PlaceOfInterest> listofpoi;
     RelativeLayout ratingLayout;
     TextView tvfeatureName;
-    RatingBar featureRating;
+    Spinner spinnerRating;
+    RatingBar rbFeature;
     int markerclickmode = 0;
     int range=300;
     public void increaseRange(){
@@ -112,6 +118,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }else{
             range+=300;
         }
+
     }
     public MapFragment() {
         // Required empty public constructor
@@ -128,12 +135,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         listofmarker = new ArrayList<>();
         ratingLayout = rootView.findViewById(R.id.ratingLayout);
         tvfeatureName = rootView.findViewById(R.id.tvfeatureName);
-        featureRating = rootView.findViewById(R.id.featureRating);
-        featureRating.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
-            String featurename = tvfeatureName.getText().toString();
-            float value = rating;
-            insertValuetodb(featurename, value);
-
+//        spinnerRating = rootView.findViewById(R.id.spinnerRating);
+        rbFeature = rootView.findViewById(R.id.rbFeature);
+        rbFeature.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                Toast.makeText(getContext(),String.valueOf(rating),Toast.LENGTH_SHORT).show();
+                toggleRatingLayout();
+            }
         });
         toggleRatingLayout();
         rbg_RouteList = rootView.findViewById(R.id.rbg_RouteList);
@@ -175,7 +184,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         clearPath();
         clearrbgList();
         setStartJourneyButton(false);
-        CreateMarkers(populateListofNearbyPlaces());
         toggleMarkermode();
     }
 
@@ -208,49 +216,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onLocationChanged(Location newLocation) {
+        lastKnownLocation=newLocation;
+        //Clear listofPOIMarker,then re add
+        for (int j = 0; j < listofPOIMarker.size(); j++) {
+            listofPOIMarker.get(j).remove();
+        }
+        listofPOIMarker = new ArrayList<>();
         if (listofpoi.size() != 0) {
             for (int i = 0; i < listofpoi.size(); i++) {
                 PlaceOfInterest cur = listofpoi.get(i);
-                boolean matched = false;
-                List<Integer> numtoremove = new ArrayList<>();
-                for (int j = 0; j < listofPOIMarker.size(); j++) {
-                    //if any marker match list of poi we skip
-                    if (listofPOIMarker.get(j).getTitle().equals(cur.getFeaturename())) {
-                        matched = true;
-                        Marker t = listofPOIMarker.get(j);
-                        LatLng d = t.getPosition();
-                        Location y = new Location("");
-                        y.setLatitude(d.latitude);
-                        y.setLongitude(d.longitude);
-                        float distanceInMeters = newLocation.distanceTo(y);
-                        if (distanceInMeters > range ) {
-                            listofPOIMarker.get(j).remove();
-                            numtoremove.add(j);
-                        }
-                    }
+                Location test = new Location("");
+                test.setLatitude(cur.getLatitude());
+                test.setLongitude(cur.getLongitude());
+                if (newLocation.distanceTo(test)<range) {
+                    Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(cur.getFeaturename()));
+                    listofPOIMarker.add(m);
                 }
-                if (!matched) {
-                    Location test = new Location("");
-                    test.setLatitude(cur.getLatitude());
-                    test.setLongitude(cur.getLongitude());
-                    float distanceInMeters = newLocation.distanceTo(test);
-                    if (distanceInMeters < range) {
-                        Marker m = mMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(test.getLatitude(), test.getLongitude()))
-                                .title(cur.getFeaturename()));
-                        listofPOIMarker.add(m);
-                    }
-                }
-
             }
             increaseRange();
 
         }
 
+
         if (markerclickmode == 0) {
-//            CreateMarkers(populateListofNearbyPlaces());
-             hideAllMarkers(listofPOIMarker);
-             showAllMarkers(listofmarker);
+            if(listofmarker!=null){
+                for (int i = 0; i < listofmarker.size(); i++) {
+                    listofmarker.get(i).remove();
+                }
+                CreateMarkers(populateListofNearbyPlaces(newLocation));
+            }
+            hideAllMarkers(listofPOIMarker);
+            showAllMarkers(listofmarker);
             System.out.println("T: Hiding marker : " + listofPOIMarker.size());
             System.out.println("T: Showing POI : " + listofmarker.size());
 
@@ -271,7 +267,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public void showAllMarkers(List<Marker> input) {
         for (int i = 0; i < input.size(); i++) {
-          input.get(i).setVisible(true);
+            input.get(i).setVisible(true);
 
         }
     }
@@ -353,7 +349,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
         getLocationPermission();
-        CreateMarkers(populateListofNearbyPlaces());
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -386,6 +381,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
             }
         });
+        getLocationPermission();
+        getDeviceLocation();
+        updateLocationUI();
+        resetMap();
+        toggleMarkermode();
     }
 
     private void CreateMarkers(List<Places> description) {
@@ -405,6 +405,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        if (myMarker!=null){
+            myMarker.remove();
+        }
         for (int i = 0; i < listofmarker.size(); i++) {
             if (marker.equals(listofmarker.get(i))) {
                 Marker t = listofmarker.get(i);
@@ -429,7 +432,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         for (int i = 0; i < listofPOIMarker.size(); i++) {
             if (marker.equals(listofPOIMarker.get(i))) {
                 tvfeatureName.setText(marker.getTitle());
-                featureRating.setStepSize(0.1f);
+                rbFeature.setStepSize(0.1f);
                 ratingLayout.setVisibility(RelativeLayout.VISIBLE);
             }
 
@@ -446,13 +449,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    private List<Places> populateListofNearbyPlaces() {
-        getLocationPermission();
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-        LatLng mycurrent = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+    private List<Places> populateListofNearbyPlaces(Location location) {
+        LatLng mycurrent = new LatLng(location.getLatitude(), location.getLongitude());
         List<String> TYPE = new ArrayList<>();
         TYPE.add("bus_station");
         TYPE.add("subway_station");
@@ -531,10 +529,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
                             //Pass to AR FROM HERE
-                            List<LocationSteps> selectroute = list.get(selectedRoute);
                             toggleMarkermode();
                             hideAllMarkers(listofmarker);
                             showAllMarkers(listofPOIMarker);
+//                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
+//                            AugmentedRealityFragment.currentLocationStepIndex = 0;
+//                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                         }
                     })
                     .setNegativeButton(android.R.string.no, null).show();
@@ -554,7 +554,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             } else {
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
+//                lastKnownLocation = null;
                 getLocationPermission();
             }
         } catch (SecurityException e) {

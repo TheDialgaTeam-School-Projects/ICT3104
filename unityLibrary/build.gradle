@@ -7,7 +7,8 @@ buildscript {
         // Must be Android Gradle Plugin 3.6.0 or later. For a list of
         // compatible Gradle versions refer to:
         // https://developer.android.com/studio/releases/gradle-plugin
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        //noinspection GradleDependency
+        classpath 'com.android.tools.build:gradle:4.0.1'
     }
 }
 

@@ -1,28 +1,44 @@
 package edu.singaporetech.ict3104.project.fragment;
 
+import android.annotation.SuppressLint;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import edu.singaporetech.ict3104.java_to_unity_proxy.NavigationManager;
 import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
-import edu.singaporetech.ict3104.project.MainActivity;
+import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.activity.BaseActivity;
+import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
+import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
 
-public class AugmentedRealityFragment extends Fragment {
+import static android.content.Context.LOCATION_SERVICE;
+
+public class AugmentedRealityFragment extends Fragment implements LocationListener {
+
+    public static List<LocationSteps> locationSteps = new ArrayList<>();
+    public static int currentLocationStepIndex = 0;
 
     private PositionSensor positionSensor;
-    private FrameLayout frameLayout;
+    private LocationManager locationManager;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        positionSensor = new PositionSensor(requireContext());
-    }
+    private FrameLayout frameLayout;
 
     @Nullable
     @Override
@@ -30,12 +46,35 @@ public class AugmentedRealityFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_augmented_reality, container, false);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        final BaseActivity activity = (BaseActivity) requireActivity();
+
+        if (!CameraPermissionHelper.hasCameraPermission(activity) || !LocationPermissionHelper.hasLocationPermission(activity)) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Asset that location steps is more than 0. If there isn't a location step, this view can't operate.
+        if (locationSteps.size() < currentLocationStepIndex + 1) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), "Unexpected error occurred. Please try again.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        positionSensor = new PositionSensor(requireContext());
+
+        locationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+
         frameLayout = view.findViewById(R.id.unityLayout);
-        frameLayout.addView(((MainActivity) requireActivity()).getUnityPlayer().getView());
-        ((MainActivity) requireActivity()).getUnityPlayer().resume();
+        frameLayout.addView(activity.getUnityPlayer().getView());
+        activity.getUnityPlayer().resume();
     }
 
     @Override
@@ -58,7 +97,37 @@ public class AugmentedRealityFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        ((MainActivity) requireActivity()).getUnityPlayer().pause();
+        ((BaseActivity) requireActivity()).getUnityPlayer().pause();
+        locationManager.removeUpdates(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        final LocationSteps locationSteps = AugmentedRealityFragment.locationSteps.get(currentLocationStepIndex);
+        final LatLng end = locationSteps.getEnd_location();
+        final Location endLocation = new Location(LocationManager.NETWORK_PROVIDER);
+        endLocation.setLatitude(end.latitude);
+        endLocation.setLongitude(end.longitude);
+
+        Log.d("TEST", "LAT: " + end.latitude + " LNG: " + end.longitude);
+
+        NavigationManager.setDistanceRemaining(location.distanceTo(endLocation));
+        NavigationManager.setTargetAzimuth(location.bearingTo(endLocation));
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }
