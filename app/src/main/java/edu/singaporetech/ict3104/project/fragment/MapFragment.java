@@ -224,12 +224,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void resetMap() {
         if (myMarker != null) {
             myMarker.remove();
-//            mMap.clear();
+
         }
         clearPath();
         clearrbgList();
         setStartJourneyButton(false);
-        toggleMarkermode();
+        markerclickmode=0;
     }
 
     @Override
@@ -431,7 +431,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         getDeviceLocation();
         updateLocationUI();
         resetMap();
-        toggleMarkermode();
     }
 
     private void CreateMarkers(List<Places> description) {
@@ -565,12 +564,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
                             List<PolylineOptions> selectedroute = listofAlternateRoute.get(selectedRoute);
-                            PolylineOptions t = new PolylineOptions();
-                            polyline = new ArrayList<>();
-                            for (int i = 0; i < selectedroute.size(); i++) {
-                                Polyline tpoly = mMap.addPolyline(selectedroute.get(i));
-                                polyline.add(tpoly);
-                            }
+//                            PolylineOptions t = new PolylineOptions();
+//                            polyline = new ArrayList<>();
+//                            for (int i = 0; i < selectedroute.size(); i++) {
+//                                Polyline tpoly = mMap.addPolyline(selectedroute.get(i));
+//                                polyline.add(tpoly);
+//                            }
                             clearrbgList();
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
