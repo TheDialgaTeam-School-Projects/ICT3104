@@ -37,4 +37,18 @@
     <string name="location_permission_title">We need permission to use your location service</string>
     <string name="location_permission_rationale">This app requires location service in order for the map to work.</string>
     <string name="permission_missing">Required permission is not granted. AR view could not be initialized.</string>
+    <string name="Place_of_interest">Place of Interest</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    
+    <string-array name="placeOfInterest">
+        <item>item 1</item>
+        <item>item 2 </item>
+        <item>item 3 </item>
+        <item>item 4</item>
+        <item>item 5</item>
+
+    </string-array>
+    
 </resources>

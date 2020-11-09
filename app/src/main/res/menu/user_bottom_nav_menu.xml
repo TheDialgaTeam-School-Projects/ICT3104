@@ -10,5 +10,13 @@
         android:id="@+id/navigation_settings"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/nav_settings" />
+    <item
+        android:id="@+id/navigation_place"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/Place_of_interest" />
+
+
+
+
 
 </menu>

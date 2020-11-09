@@ -21,6 +21,12 @@
         tools:layout="@layout/fragment_settings" />
 
     <fragment
+        android:id="@+id/navigation_place"
+        android:name="edu.singaporetech.ict3104.project.fragment.PlaceOfInterestFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_place_of_interest" />
+
+    <fragment
         android:id="@+id/augmentedRealityFragment"
         android:name="edu.singaporetech.ict3104.project.fragment.AugmentedRealityFragment"
         android:label="fragment_augmented_reality"
