@@ -93,7 +93,7 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
 
 
 
-        View view = inflater.inflate((R.layout.fragment_achievements), container, false);
+        View view = inflater.inflate((R.layout.fragment_planner), container, false);
 
         //declare textViews
 
