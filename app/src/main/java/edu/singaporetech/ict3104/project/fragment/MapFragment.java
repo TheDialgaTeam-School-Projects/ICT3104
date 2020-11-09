@@ -95,8 +95,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     Button btnReset, btnOpenARNavigation;
     LocationManager mLocationManager;
     MapView mMapView;
-    Handler mHandler;
-    Runnable runnable;
     DirectionRoute R1;
     RadioGroup rbg_RouteList;
     List<List<PolylineOptions>> listofAlternateRoute;
@@ -107,7 +105,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     TextView tvfeatureName;
     RatingBar featureRating;
     int markerclickmode = 0;
-
+    int range=300;
+    public void increaseRange(){
+        if (range>3000){
+            range =300;
+        }else{
+            range+=300;
+        }
+    }
     public MapFragment() {
         // Required empty public constructor
     }
@@ -118,23 +123,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
-//        runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                if(lastKnownLocation!=null && R1!=null){
-//                    if(doInBackground(R1.getLocationStepList())){
-//                        Toast.makeText(getActivity(), "You are getting too far", Toast.LENGTH_SHORT).show();
-//                    }
-//                    else {
-//                        Toast.makeText(getActivity(), "You are still on the route", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//                new Handler().postDelayed(runnable,5000);
-//            }
-//        };
-//        mHandler = new Handler();
         getAllPOIfromdb();
         listofPOIMarker = new ArrayList<>();
+        listofmarker = new ArrayList<>();
         ratingLayout = rootView.findViewById(R.id.ratingLayout);
         tvfeatureName = rootView.findViewById(R.id.tvfeatureName);
         featureRating = rootView.findViewById(R.id.featureRating);
@@ -179,7 +170,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void resetMap() {
         if (myMarker != null) {
             myMarker.remove();
-            mMap.clear();
+//            mMap.clear();
         }
         clearPath();
         clearrbgList();
@@ -217,31 +208,57 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     @Override
     public void onLocationChanged(Location newLocation) {
-//        Toast.makeText(getActivity(), "Location changed", Toast.LENGTH_SHORT).show();
         if (listofpoi.size() != 0) {
             for (int i = 0; i < listofpoi.size(); i++) {
                 PlaceOfInterest cur = listofpoi.get(i);
-                Location test = new Location("");//provider name is unnecessary
-                test.setLatitude(cur.getLatitude());//your coords of course
-                test.setLongitude(cur.getLongitude());
-                float distanceInMeters = newLocation.distanceTo(test);
-                //if within
-                if (distanceInMeters < 10000) {
-                    Marker m = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(test.getLatitude(), test.getLongitude()))
-                            .title(cur.getFeaturename()));
-                    listofPOIMarker.add(m);
-                    listofpoi.remove(i);
+                boolean matched = false;
+                List<Integer> numtoremove = new ArrayList<>();
+                for (int j = 0; j < listofPOIMarker.size(); j++) {
+                    //if any marker match list of poi we skip
+                    if (listofPOIMarker.get(j).getTitle().equals(cur.getFeaturename())) {
+                        matched = true;
+                        Marker t = listofPOIMarker.get(j);
+                        LatLng d = t.getPosition();
+                        Location y = new Location("");
+                        y.setLatitude(d.latitude);
+                        y.setLongitude(d.longitude);
+                        float distanceInMeters = newLocation.distanceTo(y);
+                        if (distanceInMeters > range ) {
+                            listofPOIMarker.get(j).remove();
+                            numtoremove.add(j);
+                        }
+                    }
                 }
-                //missing logic if leave area
+                if (!matched) {
+                    Location test = new Location("");
+                    test.setLatitude(cur.getLatitude());
+                    test.setLongitude(cur.getLongitude());
+                    float distanceInMeters = newLocation.distanceTo(test);
+                    if (distanceInMeters < range) {
+                        Marker m = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(test.getLatitude(), test.getLongitude()))
+                                .title(cur.getFeaturename()));
+                        listofPOIMarker.add(m);
+                    }
+                }
+
             }
+            increaseRange();
+
+        }
+
         if (markerclickmode == 0) {
-                hideAllMarkers(listofPOIMarker);
-                showAllMarkers(listofmarker);
-            }
+//            CreateMarkers(populateListofNearbyPlaces());
+             hideAllMarkers(listofPOIMarker);
+             showAllMarkers(listofmarker);
+            System.out.println("T: Hiding marker : " + listofPOIMarker.size());
+            System.out.println("T: Showing POI : " + listofmarker.size());
+
         } else if (markerclickmode == 1) {
             hideAllMarkers(listofmarker);
             showAllMarkers(listofPOIMarker);
+            System.out.println("T: Hiding marker : " + listofmarker.size());
+            System.out.println("T: Showing POI : " + listofPOIMarker.size());
         }
 
     }
@@ -254,7 +271,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public void showAllMarkers(List<Marker> input) {
         for (int i = 0; i < input.size(); i++) {
-            input.get(i).setVisible(true);
+          input.get(i).setVisible(true);
+
         }
     }
 
@@ -335,8 +353,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
         getLocationPermission();
-        final List<Places> placeslist = populateListofNearbyPlaces();
-        CreateMarkers(placeslist);
+        CreateMarkers(populateListofNearbyPlaces());
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -347,7 +364,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
                                     clearPath();
-                                    mMap.clear();
+//                                    mMap.clear();
                                     selectedLocation = new LatLng(arg0.latitude, arg0.longitude);
                                     markerOptions = new MarkerOptions().position(selectedLocation).title("Selected Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
                                     myMarker = mMap.addMarker(markerOptions);
@@ -372,8 +389,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void CreateMarkers(List<Places> description) {
-
-        listofmarker = new ArrayList<Marker>();
+        if (listofmarker.size()>0){
+            for (int i = 0; i < listofmarker.size(); i++) {
+                listofmarker.get(i).remove();
+            }
+        }
+        listofmarker = new ArrayList<>();
         for (int i = 0; i < description.size(); i++) {
             Places t = description.get(i);
             LatLng sl = new LatLng(t.getLatitude(), t.getLongitude());
@@ -388,7 +409,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             if (marker.equals(listofmarker.get(i))) {
                 Marker t = listofmarker.get(i);
                 clearPath();
-                mMap.clear();
+//                mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(t.getPosition()).title(t.getTitle()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
                 selectedLocation = marker.getPosition();
                 setStartJourneyButton(true);
@@ -499,10 +520,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
-//                        R1 = new DirectionRoute(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), selectedLocation, getText(R.string.google_maps_key).toString());
-//                        clearPath();
-//                        mMap.clear();
-//                        myMarker=mMap.addMarker(new MarkerOptions().position(selectedLocation).title("selectedLocation").icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
                             List<PolylineOptions> selectedroute = listofAlternateRoute.get(selectedRoute);
                             PolylineOptions t = new PolylineOptions();
                             polyline = new ArrayList<>();
@@ -511,12 +528,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 polyline.add(tpoly);
                             }
                             clearrbgList();
-                            // polyline = mMap.addPolyline(options);
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
                             //Pass to AR FROM HERE
                             List<LocationSteps> selectroute = list.get(selectedRoute);
                             toggleMarkermode();
+                            hideAllMarkers(listofmarker);
+                            showAllMarkers(listofPOIMarker);
                         }
                     })
                     .setNegativeButton(android.R.string.no, null).show();
@@ -530,7 +548,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
         try {
             if (locationPermissionGranted) {
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
