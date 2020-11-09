@@ -47,10 +47,9 @@ import edu.singaporetech.ict3104.project.R;
 
 import static android.content.ContentValues.TAG;
 
-public class AchievementsFragment extends Fragment implements View.OnClickListener {
+public class AchievementsFragment extends Fragment {
 
     private ArrayList<feature> featureList = new ArrayList<>();
-    private ListView mListView;
     private TextView textViewSortFN;
     private TextView textViewSortFR;
     private TextView textViewSortFA;
@@ -67,6 +66,7 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         final FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
 
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -87,29 +87,17 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
 
 
     }
+    public void getFeatures(){
+        int i = 0;
+
+
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-
-
-
         View view = inflater.inflate((R.layout.fragment_achievements), container, false);
-
-        //declare textViews
-
-        textViewSortFN = view.findViewById(R.id.heading_name);
-        textViewSortFR = view.findViewById(R.id.heading_rating);
-        textViewSortFA = view.findViewById(R.id.heading_age);
-        textViewSortFG = view.findViewById(R.id.heading_gender);
-        textViewSortFM = view.findViewById(R.id.heading_method);
-
         ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
-        // initialize
-        textViewSortFN.setOnClickListener(this::onClick);
-        textViewSortFR.setOnClickListener(this::onClick);
-        textViewSortFA.setOnClickListener(this::onClick);
-        textViewSortFG.setOnClickListener(this::onClick);
-        textViewSortFM.setOnClickListener(this::onClick);
+
 
         db.collection("Survey")
                 .get()
@@ -121,19 +109,16 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 // for each document
                                 // store into variables
-
-                                String getFeatureN = document.getString("FeatureName");
-                                Long getFeatureR = document.getLong("FeatureR");
-                                int getFRInt = Math.toIntExact(getFeatureR);
-
                                 Long getAge = document.getLong("Age");
                                 //convert to int
                                 int getAgeInt = Math.toIntExact(getAge);
+                                String getFeatureN = document.getString("FeatureName");
                                 String getCommuteMethod = document.getString("CommuteMethod");
                                 char getCM_Char = getCommuteMethod.charAt(0);
-
                                 String getGender = document.getString("Gender");
-                                char getGender_Char = getGender.charAt(0);
+                                char getGender_Char = getCommuteMethod.charAt(0);
+                                Long getFeatureR = document.getLong("FeatureR");
+                                int getFRInt = Math.toIntExact(getFeatureR);
 
                                  feature featureObject= new feature(getFeatureN,getFRInt,getAgeInt,getGender_Char,getCM_Char);
                                  featureList.add(featureObject);
@@ -153,97 +138,4 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
         return view;
     }
 
-    @Override
-    public void onClick(View v) {
-//        View v2 = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-//        ListView mListView = (ListView) v2.findViewById(R.id.planner_listview);
-//        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        if (v == textViewSortFN){
-            //implement method
-            Toast.makeText(getContext(), "Sort By Name", Toast.LENGTH_SHORT).show();
-            sortFeatureListByN(this);
-        }
-        if (v == textViewSortFR){
-            Toast.makeText(getContext(), "Sort By Rating", Toast.LENGTH_SHORT).show();
-            sortFLByRating(this);
-        }
-        if (v == textViewSortFA){
-            Toast.makeText(getContext(), "Sort By Age", Toast.LENGTH_SHORT).show();
-            sortFLByAge(this);
-        }
-        if (v == textViewSortFG){
-            Toast.makeText(getContext(), "Sort By Gender", Toast.LENGTH_SHORT).show();
-            sortFLByGender(this);
-        }
-        if (v == textViewSortFM){
-            Toast.makeText(getContext(), "Sort By Method", Toast.LENGTH_SHORT).show();
-            sortFLByMethod(this);
-        }
-    }
-
-    private void sortFeatureListByN(AchievementsFragment v){
-        //View v = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-        ListView mListView = (ListView) getView().findViewById(R.id.planner_listview);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        Collections.sort(featureList, new Comparator<feature>() {
-            @Override
-            public int compare(feature o1, feature o2) {
-                return o1.getFeature_name().compareTo(o2.getFeature_name());
-            }
-        });
-        mListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-    private void sortFLByGender(AchievementsFragment v){
-        //View v = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-        ListView mListView = (ListView) getView().findViewById(R.id.planner_listview);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        Collections.sort(featureList, new Comparator<feature>() {
-            @Override
-            public int compare(feature o1, feature o2) {
-                return o2.getUser_gender() - (o1.getUser_gender());
-            }
-        });
-        mListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-    private void sortFLByMethod(AchievementsFragment v){
-        //View v = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-        ListView mListView = (ListView) getView().findViewById(R.id.planner_listview);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        Collections.sort(featureList, new Comparator<feature>() {
-            @Override
-            public int compare(feature o1, feature o2) {
-                return o1.getUser_method() - (o2.getUser_method());
-            }
-        });
-        mListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-    private void sortFLByRating(AchievementsFragment v){
-        //View v = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-        ListView mListView = (ListView) getView().findViewById(R.id.planner_listview);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        Collections.sort(featureList, new Comparator<feature>() {
-            @Override
-            public int compare(feature o1, feature o2) {
-                return o2.getFeature_rating() - (o1.getFeature_rating());
-            }
-        });
-        mListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-    private void sortFLByAge(AchievementsFragment v){
-        //View v = getActivity().getLayoutInflater().inflate(R.layout.adapter_view_layout,null);
-        ListView mListView = (ListView) getView().findViewById(R.id.planner_listview);
-        FeatureListAdapter adapter = new FeatureListAdapter(getActivity(),R.layout.adapter_view_layout, featureList);
-        Collections.sort(featureList, new Comparator<feature>() {
-            @Override
-            public int compare(feature o1, feature o2) {
-                return o2.getUser_age() - (o1.getUser_age());
-            }
-        });
-        mListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
 }

@@ -39,9 +39,8 @@ public class FeatureListAdapter extends ArrayAdapter<feature> {
 
         feature feature = new feature(name,rating,age,gender,method);
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        if (convertView == null) {
-            convertView = inflater.inflate(mResource, parent, false);
-        }
+        convertView = inflater.inflate(mResource,parent ,false);
+
         TextView featureName = (TextView) convertView.findViewById(R.id.feature_name);
         TextView featureRating = (TextView) convertView.findViewById(R.id.feature_rating);
         TextView featureAge = (TextView) convertView.findViewById(R.id.feature_age);
