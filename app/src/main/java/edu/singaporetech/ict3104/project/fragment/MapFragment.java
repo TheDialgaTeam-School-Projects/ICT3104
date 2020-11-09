@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.location.Location;
@@ -24,6 +25,7 @@ import edu.singaporetech.ict3104.project.Places;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
+import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
 import android.os.Debug;
 import android.os.Handler;
@@ -76,7 +78,9 @@ import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -86,7 +90,11 @@ import static android.content.Context.LOCATION_SERVICE;
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, LocationListener {
     private static final String TAG = "MapFragment";
+    public static final String INTENT_USER_EMAIL = "INTENT_USER_EMAIL";
+    private String  age;
+    private String email,gender,commuteMethod;
     private static final float DEFAULT_ZOOM = 15.0f;
+    private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
     public static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     MarkerOptions markerOptions;
     Marker myMarker;
@@ -141,7 +149,44 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
                 Toast.makeText(getContext(),String.valueOf(rating),Toast.LENGTH_SHORT).show();
+                String tag="";
+                for(int i=0; i <listofpoi.size();i++){
+                    if (tvfeatureName.getText().toString().equals(listofpoi.get(i).getFeaturename())){
+                        tag = listofpoi.get(i).getTag();
+                    }
+                }
+                switch(commuteMethod){
+                    case "Walking":
+                        commuteMethod="W";
+                        break;
+                    case "Parent with Pram":
+                        commuteMethod="PP";
+                        break;
+                    case "Wheelchair":
+                        commuteMethod="WC";
+                        break;
+                    case "Parent":
+                        commuteMethod="P";
+                        break;
+                }
+                switch(gender){
+                    case "Male":
+                        gender="M";
+                        break;
+                    case "Female":
+                        gender="F";
+                        break;
+                }
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                Map<String, Object> data = new HashMap<>();
+                data.put("Age", Integer.parseInt(age));
+                data.put("CommuteMethod", commuteMethod);
+                data.put("FeatureName", tag);
+                data.put("FeatureR", rating);
+                data.put("Gender",gender);
+                db.collection("Survey").document().set(data);
                 toggleRatingLayout();
+                Toast.makeText(getActivity(), "Submitted!", Toast.LENGTH_SHORT).show();
             }
         });
         toggleRatingLayout();
@@ -196,6 +241,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapView.getMapAsync(this);
 //        mHandler.postDelayed(runnable,5000);
         setStartJourneyButton(false);
+
     }
 
     public void getAllPOIfromdb() {
@@ -656,12 +702,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return true;
     }
 
-    public void insertValuetodb(String featurename, float value) {
-        //INSERT TO RATING DB
 
-        Toast.makeText(getActivity(), "Rating for" + featurename + "submitted", Toast.LENGTH_SHORT).show();
-        toggleRatingLayout();
-    }
 
     public void toggleRatingLayout() {
         if (ratingLayout.getVisibility() == RelativeLayout.GONE) {
@@ -721,5 +762,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             return;
         }
         updateLocationUI();
+    }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        email = requireActivity().getIntent().getStringExtra(MapFragment.INTENT_USER_EMAIL);
+        FireStoreHelper.getUserData(email)
+                .addOnFailureListener(requireActivity(), e -> {
+                    Log.e(MapFragment.class.getName(), "Unable to retrieve user data.", e);
+                    Toast.makeText(requireActivity(), "Unable to retrieve user data.", Toast.LENGTH_LONG).show();
+                })
+                .addOnSuccessListener(requireActivity(), documentSnapshot -> {
+                    age=documentSnapshot.getString("Age");
+                    commuteMethod=documentSnapshot.getString("Commute Type");
+                    gender=documentSnapshot.getString("Gender");
+
+
+                });
+
     }
 }

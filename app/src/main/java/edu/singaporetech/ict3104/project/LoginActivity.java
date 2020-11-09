@@ -22,6 +22,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Map;
+
+import edu.singaporetech.ict3104.project.fragment.MapFragment;
 import edu.singaporetech.ict3104.project.fragment.SettingsFragment;
 import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
@@ -134,11 +138,11 @@ public class LoginActivity extends AppCompatActivity {
                                 FireBaseUserRole = document.getString("Role");
                                 if (FireBaseUserRole.equals("T"))
                                 {
-                                    startActivity(new Intent(getApplicationContext(), PlannerMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
+                                    startActivity(new Intent(getApplicationContext(), PlannerMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email).putExtra(MapFragment.INTENT_USER_EMAIL,email));
                                 }
                                 else
                                 {
-                                    startActivity(new Intent(getApplicationContext(), UserMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
+                                    startActivity(new Intent(getApplicationContext(), UserMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email).putExtra(MapFragment.INTENT_USER_EMAIL,email));
                                 }
                             } else {
                                 Log.d(TAG, "No such document");
