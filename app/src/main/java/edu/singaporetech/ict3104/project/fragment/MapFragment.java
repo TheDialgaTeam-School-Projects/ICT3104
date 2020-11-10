@@ -275,12 +275,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 test.setLatitude(cur.getLatitude());
                 test.setLongitude(cur.getLongitude());
                 if (newLocation.distanceTo(test)<range) {
-                    Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(cur.getFeaturename()));
+                    Marker m;
+                    String title = cur.getFeaturename().substring(0, Math.min(cur.getFeaturename().length(), 34));
+                    if(cur.getTag().equals("Staircase")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.staircase)));
+                    }else if(cur.getTag().equals("Ramp")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.ramp)));
+                    }else if(cur.getTag().contains("Path")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.path)));
+                    }else if(cur.getTag().equals("Bollard")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bollard)));
+                    }else if(cur.getTag().equals("Bench")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bench)));
+                    }else if(cur.getTag().equals("Fencing")){
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.fence)));
+                    }else {
+                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.place_of_interest)));
+                    }
                     listofPOIMarker.add(m);
+                    listofPOIMarker.get(listofPOIMarker.size()-1).setVisible(false);
                 }
-            }
-            for (int i = 0; i < listofPOIMarker.size(); i++) {
-                listofPOIMarker.get(i).setVisible(false);
             }
             increaseRange();
 
@@ -339,13 +353,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         setPolicy();
     }
 
-    private void startAR() {
-        if (selectedLocation == null) {
-            //REJ
-        } else {
-
-        }
-    }
 
     public void initRBGselection() {
         rbg_RouteList.check(0);
@@ -457,7 +464,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             if (marker.equals(listofmarker.get(i))) {
                 Marker t = listofmarker.get(i);
                 clearPath();
-//                mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(t.getPosition()).title(t.getTitle()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station)));
                 selectedLocation = marker.getPosition();
                 setStartJourneyButton(true);
@@ -564,12 +570,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         public void onClick(DialogInterface dialog, int whichButton) {
                             Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
                             List<PolylineOptions> selectedroute = listofAlternateRoute.get(selectedRoute);
-//                            PolylineOptions t = new PolylineOptions();
-//                            polyline = new ArrayList<>();
-//                            for (int i = 0; i < selectedroute.size(); i++) {
-//                                Polyline tpoly = mMap.addPolyline(selectedroute.get(i));
-//                                polyline.add(tpoly);
-//                            }
                             clearrbgList();
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
@@ -577,9 +577,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             toggleMarkermode();
                             hideAllMarkers(listofmarker);
                             showAllMarkers(listofPOIMarker);
-//                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
-//                            AugmentedRealityFragment.currentLocationStepIndex = 0;
-//                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
+                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
+                            AugmentedRealityFragment.currentLocationStepIndex = 0;
+                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                         }
                     })
                     .setNegativeButton(android.R.string.no, null).show();

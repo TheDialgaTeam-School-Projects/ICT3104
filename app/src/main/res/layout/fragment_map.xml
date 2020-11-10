@@ -66,29 +66,34 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="2"
         android:orientation="vertical"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollbarStyle="insideOverlay"
         android:id="@+id/ratingLayout">
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/tvfeatureLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="Feature Name: " />
+            android:text="Name:"
+            />
+
         <TextView
-            android:id="@+id/tvfeatureName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/tvfeatureName"
             android:layout_below="@id/tvfeatureLabel"
-            android:bufferType="spannable"
-            android:text="TESTEXXT" />
+            android:layout_alignParentStart="true"
+            android:layout_toEndOf="@id/tvfeatureLabel"
+            />
+
+
 
         <RatingBar
             android:id="@+id/rbFeature"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="?android:attr/ratingBarStyleSmall"
-            android:layout_alignEnd="@+id/tvfeatureLabel"
-            android:numStars="5"
+            android:layout_alignParentEnd="true"
+            android:numStars="3"
             android:stepSize="0.1"/>
 
 
