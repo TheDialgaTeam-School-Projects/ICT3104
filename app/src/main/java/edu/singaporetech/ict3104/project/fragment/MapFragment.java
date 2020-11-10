@@ -230,6 +230,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         clearrbgList();
         setStartJourneyButton(false);
         markerclickmode=0;
+        ratingLayout.setVisibility(RelativeLayout.GONE);
+
     }
 
     @Override
@@ -274,7 +276,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 Location test = new Location("");
                 test.setLatitude(cur.getLatitude());
                 test.setLongitude(cur.getLongitude());
-                if (newLocation.distanceTo(test)<range) {
+                if (newLocation.distanceTo(test)<500) {
                     Marker m;
                     String title = cur.getFeaturename().substring(0, Math.min(cur.getFeaturename().length(), 34));
                     if(cur.getTag().equals("Staircase")){
