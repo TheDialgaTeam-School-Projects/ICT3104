@@ -279,6 +279,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     listofPOIMarker.add(m);
                 }
             }
+            for (int i = 0; i < listofPOIMarker.size(); i++) {
+                listofPOIMarker.get(i).setVisible(false);
+            }
             increaseRange();
 
         }
@@ -293,14 +296,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
             hideAllMarkers(listofPOIMarker);
             showAllMarkers(listofmarker);
-            System.out.println("T: Hiding marker : " + listofPOIMarker.size());
-            System.out.println("T: Showing POI : " + listofmarker.size());
 
         } else if (markerclickmode == 1) {
             hideAllMarkers(listofmarker);
             showAllMarkers(listofPOIMarker);
-            System.out.println("T: Hiding marker : " + listofmarker.size());
-            System.out.println("T: Showing POI : " + listofPOIMarker.size());
         }
 
     }
@@ -445,6 +444,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             LatLng sl = new LatLng(t.getLatitude(), t.getLongitude());
             MarkerOptions tmarkerOptions = new MarkerOptions().position(sl).title(t.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
             listofmarker.add(mMap.addMarker(tmarkerOptions));
+            listofmarker.get(i).setVisible(false);
         }
     }
 

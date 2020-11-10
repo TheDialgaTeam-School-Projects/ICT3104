@@ -48,7 +48,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/routeselectionLayout">
 
         <RadioGroup
             android:layout_width="match_parent"
@@ -81,14 +82,15 @@
             android:bufferType="spannable"
             android:text="TESTEXXT" />
 
-       <RatingBar
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:layout_below="@+id/tvfeatureName"
-           android:id="@+id/rbFeature"
-           android:numStars="5"
-           android:stepSize="0.1"
-           />
+        <RatingBar
+            android:id="@+id/rbFeature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_alignEnd="@+id/tvfeatureLabel"
+            android:numStars="5"
+            android:stepSize="0.1"/>
+
 
 
     </RelativeLayout>
