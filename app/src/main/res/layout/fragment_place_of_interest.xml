@@ -9,7 +9,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="232dp"
+        android:layout_marginTop="196dp"
         android:text="Add Place of interest"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -21,13 +21,13 @@
         android:id="@+id/placeOIspinner"
         android:layout_width="294dp"
         android:layout_height="41dp"
-        android:layout_marginTop="16dp"
 
+        android:layout_marginTop="8dp"
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/nameofplace" />
 
     <Button
         android:id="@+id/add_btn"
@@ -38,7 +38,21 @@
         android:layout_width="181dp"
         android:layout_height="46dp"
         android:layout_marginTop="8dp"
+        android:hint="name "
         android:text="Add" />
+
+    <EditText
+        android:id="@+id/nameofplace"
+        android:layout_width="292dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="Name of place "
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

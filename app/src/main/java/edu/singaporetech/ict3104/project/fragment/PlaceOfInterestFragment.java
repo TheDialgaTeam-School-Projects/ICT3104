@@ -14,8 +14,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import android.view.LayoutInflater;
@@ -40,6 +42,9 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
     private Spinner spinner;
     Location curLocation;
     LocationManager mLocationManager;
+
+    private double longitude , Latitude;
+    private String spinnerData = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +75,27 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
         spinner.setAdapter(adapter);
 
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                Toast.makeText(parent.getContext(),"on Item Select : \n " + parent.getItemAtPosition(position).toString(),Toast.LENGTH_LONG).show();
+                spinnerData = parent.getItemAtPosition(position).toString();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+
+        EditText eTnameOfplace = view.findViewById(R.id.nameofplace);
+
+        String nameOfplace = eTnameOfplace.getText().toString();
+
 //        Button button_add_place_of_Interest = view.findViewById(R.id.add_btn);
 //        button_add_place_of_Interest.setOnClickListener(v -> {
 //            startActivity(new Intent(this, MapFragment.class));
@@ -88,6 +114,22 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
                 Toast.makeText(getActivity(), "place of interest", Toast.LENGTH_LONG).show();
 
 
+                // for fire base
+
+                // name of place of interest
+                //       nameOfplace;
+
+                // place of interest object
+                
+                    // spinnerData ;
+
+
+                // current locaiton
+                longitude = curLocation.getLongitude();
+                Latitude =curLocation.getLatitude() ;
+
+
+
             }
         });
 
@@ -95,10 +137,14 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
 
 
     }
+
+
     @Override
     public void onLocationChanged(Location newLocation) {
         curLocation=newLocation;
         Toast.makeText(getActivity(),String.valueOf(curLocation.getLongitude() )+ String.valueOf(curLocation.getLatitude()),Toast.LENGTH_SHORT).show();
+
+
     }
 
     @Override
