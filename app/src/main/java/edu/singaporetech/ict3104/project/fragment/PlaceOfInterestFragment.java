@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 
+import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,12 +29,17 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.singaporetech.ict3104.project.ForgetPasswordActivity;
 import edu.singaporetech.ict3104.project.LoginActivity;
 import edu.singaporetech.ict3104.project.R;
+import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -74,6 +80,7 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_layout);
         spinner.setAdapter(adapter);
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -111,31 +118,16 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
             public void onClick(View v)
             {
 
-                Toast.makeText(getActivity(), "place of interest", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getActivity(), "place of interest", Toast.LENGTH_LONG).show();
+                Map<String, Object> data = new HashMap<>();
+                data.put("Item", spinner.getSelectedItem());
+                data.put("Lat", curLocation.getLatitude());
+                data.put("Long", curLocation.getLongitude());
+                data.put("Name", nameOfplace);
 
-
-                // for fire base
-
-                // name of place of interest
-                //       nameOfplace;
-
-                // place of interest object
-                
-                    // spinnerData ;
-
-
-                // current locaiton
-                longitude = curLocation.getLongitude();
-                Latitude =curLocation.getLatitude() ;
-
-
-
+                db.collection("POI").document().set(data);
             }
         });
-
-
-
-
     }
 
 
