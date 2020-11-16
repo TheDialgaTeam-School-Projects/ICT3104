@@ -30,4 +30,11 @@
             app:destination="@id/navigation_map" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_planner"
+        android:name="edu.singaporetech.ict3104.project.fragment.PlannerFragment"
+        android:label="fragment_planner"
+        tools:layout="@layout/fragment_planner">
+    </fragment>
+
 </navigation>
