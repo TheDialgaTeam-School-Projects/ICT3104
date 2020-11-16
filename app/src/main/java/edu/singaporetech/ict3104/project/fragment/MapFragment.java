@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
@@ -61,6 +62,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.JsonArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,6 +76,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,11 +128,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     List<Marker> listofPOIMarker;
     List<PlaceOfInterest> listofpoi;
     RelativeLayout ratingLayout;
-    TextView tvfeatureName;
+    TextView tvfeatureName,tv_degree ;
     Spinner spinnerRating;
     RatingBar rbFeature;
     int markerclickmode = 0;
+    ImageView iv_weather;
     private GoogleMap mMap;
+    private Thread mythread;
+    private boolean stopThread=false;
+    private double temp=0;
+    private String wheathercondition;
+    DecimalFormat df = new DecimalFormat("#.#");
+    private Handler mHandler;
+    private int mInterval = 60000; // 5 seconds by default, can be changed later
     int range=300;
     public void increaseRange(){
         if (range>3000){
@@ -154,7 +165,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         listofmarker = new ArrayList<>();
         ratingLayout = rootView.findViewById(R.id.ratingLayout);
         tvfeatureName = rootView.findViewById(R.id.tvfeatureName);
-//        spinnerRating = rootView.findViewById(R.id.spinnerRating);
+        tv_degree = rootView.findViewById(R.id.tv_degree);
+        iv_weather = rootView.findViewById(R.id.iv_weather);
+        mHandler = new Handler();
+        startRepeatingTask();
         rbFeature = rootView.findViewById(R.id.rbFeature);
         rbFeature.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
@@ -252,7 +266,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
         mMapView.getMapAsync(this);
-//        mHandler.postDelayed(runnable,5000);
         setStartJourneyButton(false);
 
     }
@@ -402,8 +415,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        stopRepeatingTask();
     }
-
+    void startRepeatingTask() {
+        mStatusChecker.run();
+    }
+    void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
+    }
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateWeather(); //this function can change value of mInterval.
+            } finally {
+                // 100% guarantee that this always happens, even if
+                // your update method throws an exception
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
     @Override
     public void onLowMemory() {
         super.onLowMemory();
@@ -587,15 +618,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             setStartJourneyButton(false);
                             List<List<LocationSteps>> list = R1.getLocationStepList();
                             //Pass to AR FROM HERE
-                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
-                            AugmentedRealityFragment.currentLocationStepIndex = 0;
-                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                             toggleMarkermode();
                             hideAllMarkers(listofmarker);
                             showAllMarkers(listofPOIMarker);
-                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
-                            AugmentedRealityFragment.currentLocationStepIndex = 0;
-                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
+//                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
+//                            AugmentedRealityFragment.currentLocationStepIndex = 0;
+//                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                         }
                     })
                     .setNegativeButton(android.R.string.no, null).show();
@@ -794,6 +822,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
 
                 });
+
+    }
+
+    public void getweatherstatus(){
+
+        try{
+            String apiLink="https://api.openweathermap.org/data/2.5/weather?q=singapore&appid=f5d4780942ffeb755aea90cf2df24e69";
+            URL url2 = new URL(apiLink);
+            HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
+            try{
+                InputStream in = new BufferedInputStream(connection.getInputStream());
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
+                String response = responseStrBuilder.toString();
+                JSONObject jsonObject = new JSONObject(response);
+                JSONObject main = jsonObject.getJSONObject("main");
+                temp = main.getDouble("temp");
+                JSONArray weather = jsonObject.getJSONArray("weather");
+                JSONObject firstobject = weather.getJSONObject(0);
+                wheathercondition = firstobject.getString("main");
+            }
+            finally
+            {
+                connection.disconnect();
+            }
+        }catch(IOException | JSONException e) {
+            String t = e.getMessage();
+        }
+
+    }
+    public void updateWeather(){
+        Log.i("UPDATE", "MyClass.getView() — get item number $position");
+        getweatherstatus();
+        double kelvin = 273.15;
+        df.format(temp-kelvin);
+//        tv_degree.setText(String.format("%s°C", Double.toString(temp-kelvin)));
+        tv_degree.setText(String.format("%s°C", Double.toString(Double.parseDouble(df.format(temp-kelvin)))));
+        if (wheathercondition.equals("Clouds")){
+            iv_weather.setImageResource(R.drawable.ic_baseline_cloud_24);
+        }else if (wheathercondition.equals("Rain")){
+            iv_weather.setImageResource(R.drawable.ic_baseline_rain_24);
+        }else{
+            iv_weather.setImageResource(R.drawable.ic_baseline_ac_unit_24);
+
+        }
 
     }
 }
