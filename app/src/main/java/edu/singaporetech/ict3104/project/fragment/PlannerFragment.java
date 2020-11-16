@@ -89,15 +89,18 @@ public class PlannerFragment extends Fragment implements View.OnClickListener {
                                 int getAgeInt = Math.toIntExact(getAge);
 
                                 //retrieve commuteMethod
+                                String w = "walking";
+                                String wc = "wheelchair";
+                                String pwp ="parent with pram";
                                 String getCommuteMethod = document.getString("CommuteMethod");
                                 //shorten for display
-                                if (getCommuteMethod == "Walking") {
+                                if (getCommuteMethod.equalsIgnoreCase(w)) {
                                     getCommuteMethod = "W";
                                 }
-                                if (getCommuteMethod == "Wheelchair") {
+                                if (getCommuteMethod.equalsIgnoreCase(wc)) {
                                     getCommuteMethod = "WC";
                                 }
-                                if (getCommuteMethod == "Parent with Pram"){
+                                if (getCommuteMethod.equalsIgnoreCase(pwp)){
                                     getCommuteMethod = "PwP";
                                 }
                                 //String getCMName =  getCommuteMethod.charAt(0);
@@ -108,8 +111,6 @@ public class PlannerFragment extends Fragment implements View.OnClickListener {
 
                                 feature featureObject = new feature(getFeatureN, getFRInt, getAgeInt, getGender_Char, getCommuteMethod);
                                 featureList.add(featureObject);
-								app/src/main/java/edu/singaporetech/ict3104/project/fragment/PlannerFragment.java
-
                             }
                             ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
                             FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
