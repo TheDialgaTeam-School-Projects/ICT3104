@@ -129,14 +129,31 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
                                 Long getAge = document.getLong("Age");
                                 //convert to int
                                 int getAgeInt = Math.toIntExact(getAge);
+
+                                //retrieve commuteMethod
                                 String getCommuteMethod = document.getString("CommuteMethod");
-                                char getCM_Char = getCommuteMethod.charAt(0);
+                                //shorten for display
+                                if (getCommuteMethod == "Walking") {
+                                    getCommuteMethod = "W";
+                                }
+                                if (getCommuteMethod == "Wheelchair") {
+                                    getCommuteMethod = "WC";
+                                }
+                                if (getCommuteMethod == "Parent with Pram"){
+                                    getCommuteMethod = "PwP";
+                                }
+                                //String getCMName =  getCommuteMethod.charAt(0);
 
                                 String getGender = document.getString("Gender");
                                 char getGender_Char = getGender.charAt(0);
 
+<<<<<<< Updated upstream:app/src/main/java/edu/singaporetech/ict3104/project/fragment/AchievementsFragment.java
                                  feature featureObject= new feature(getFeatureN,getFRInt,getAgeInt,getGender_Char,getCM_Char);
                                  featureList.add(featureObject);
+=======
+                                feature featureObject = new feature(getFeatureN, getFRInt, getAgeInt, getGender_Char, getCommuteMethod);
+                                featureList.add(featureObject);
+>>>>>>> Stashed changes:app/src/main/java/edu/singaporetech/ict3104/project/fragment/PlannerFragment.java
 
                             }
                             ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
@@ -214,7 +231,7 @@ public class AchievementsFragment extends Fragment implements View.OnClickListen
         Collections.sort(featureList, new Comparator<feature>() {
             @Override
             public int compare(feature o1, feature o2) {
-                return o1.getUser_method() - (o2.getUser_method());
+                return o1.getUser_method().compareTo(o2.getUser_method());
             }
         });
         mListView.setAdapter(adapter);

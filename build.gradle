@@ -5,7 +5,12 @@ buildscript {
         jcenter()
     }
     dependencies {
+<<<<<<< Updated upstream
         classpath 'com.android.tools.build:gradle:4.1.0'
+=======
+        //noinspection GradleDependency
+        classpath 'com.android.tools.build:gradle:4.1.1'
+>>>>>>> Stashed changes
         classpath 'com.google.gms:google-services:4.3.4'
 
         // NOTE: Do not place your application dependencies here; they belong
