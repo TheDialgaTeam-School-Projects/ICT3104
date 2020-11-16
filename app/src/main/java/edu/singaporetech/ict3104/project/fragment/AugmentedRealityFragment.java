@@ -1,6 +1,8 @@
 package edu.singaporetech.ict3104.project.fragment;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,8 +27,6 @@ import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
-import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
-import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -53,11 +53,24 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
         final BaseActivity activity = (BaseActivity) requireActivity();
 
-        if (!CameraPermissionHelper.hasCameraPermission(activity) || !LocationPermissionHelper.hasLocationPermission(activity)) {
+        if (requireContext().checkSelfPermission(BaseActivity.CAMERA_PERMISSION) == PackageManager.PERMISSION_DENIED) {
             activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
             Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
             return;
         }
+
+        if (requireContext().checkSelfPermission(BaseActivity.FINE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (requireContext().checkSelfPermission(BaseActivity.COARSE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
 
         // Asset that location steps is more than 0. If there isn't a location step, this view can't operate.
         if (locationSteps.size() < currentLocationStepIndex + 1) {

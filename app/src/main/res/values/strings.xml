@@ -32,9 +32,5 @@
     <string name="resetMap">Reset Map</string>
     <string name="arNavigation">3D Navigation</string>
     <string name="startRoute">Start Route</string>
-    <string name="camera_permission_title">We need permission to use your camera</string>
-    <string name="camera_permission_rationale">This app requires camera in order for AR functionality to work.</string>
-    <string name="location_permission_title">We need permission to use your location service</string>
-    <string name="location_permission_rationale">This app requires location service in order for the map to work.</string>
     <string name="permission_missing">Required permission is not granted. AR view could not be initialized.</string>
 </resources>

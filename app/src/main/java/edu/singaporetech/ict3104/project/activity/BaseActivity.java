@@ -1,6 +1,8 @@
 package edu.singaporetech.ict3104.project.activity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -10,21 +12,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.unity3d.player.IUnityPlayerLifecycleEvents;
 import com.unity3d.player.UnityPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import edu.singaporetech.ict3104.project.LoginActivity;
-import edu.singaporetech.ict3104.project.helpers.permission.CameraPermissionHelper;
-import edu.singaporetech.ict3104.project.helpers.permission.LocationPermissionHelper;
 
 public abstract class BaseActivity extends AppCompatActivity implements IUnityPlayerLifecycleEvents, FirebaseAuth.AuthStateListener {
+
+    public static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+    public static final String FINE_LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
+    public static final String COARSE_LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
     private final FirebaseAuth firebaseAuth;
 
     protected UnityPlayer mUnityPlayer;
-
-    private boolean cameraPermissionRequested = false;
-    private boolean locationPermissionRequested = false;
 
     protected BaseActivity() {
         this.firebaseAuth = FirebaseAuth.getInstance();
@@ -50,12 +54,23 @@ public abstract class BaseActivity extends AppCompatActivity implements IUnityPl
         mUnityPlayer = new UnityPlayer(this, this);
         firebaseAuth.addAuthStateListener(this);
 
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-            CameraPermissionHelper.requestCameraPermission(this);
+        final List<String> permissionToGrant = new ArrayList<>();
+
+        if (checkSelfPermission(CAMERA_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            permissionToGrant.add(CAMERA_PERMISSION);
         }
 
-        if (!LocationPermissionHelper.hasLocationPermission(this)) {
-            LocationPermissionHelper.requestLocationPermission(this);
+        if (checkSelfPermission(FINE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            permissionToGrant.add(FINE_LOCATION_PERMISSION);
+        }
+
+        if (checkSelfPermission(COARSE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            permissionToGrant.add(COARSE_LOCATION_PERMISSION);
+
+        }
+
+        if (permissionToGrant.size() > 0) {
+            requestPermissions(permissionToGrant.toArray(new String[0]), 0);
         }
     }
 
@@ -63,23 +78,17 @@ public abstract class BaseActivity extends AppCompatActivity implements IUnityPl
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == CameraPermissionHelper.CAMERA_PERMISSION_CODE) {
-            if (!cameraPermissionRequested) {
-                cameraPermissionRequested = true;
-                if (CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                    CameraPermissionHelper.showRequestPermissionRationale(this);
+        if (requestCode == 0) {
+            final List<String> permissionToGrant = new ArrayList<>();
+
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                    permissionToGrant.add(permissions[i]);
                 }
-            } else {
-                startActivity(new Intent(this, LoginActivity.class));
             }
-        } else if (requestCode == LocationPermissionHelper.LOCATION_PERMISSION_CODE) {
-            if (!locationPermissionRequested) {
-                locationPermissionRequested = true;
-                if (LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                    LocationPermissionHelper.showRequestPermissionRationale(this);
-                }
-            } else {
-                startActivity(new Intent(this, LoginActivity.class));
+
+            if (permissionToGrant.size() > 0) {
+                requestPermissions(permissionToGrant.toArray(new String[0]), 1);
             }
         }
     }
@@ -201,4 +210,5 @@ public abstract class BaseActivity extends AppCompatActivity implements IUnityPl
     public boolean onGenericMotionEvent(MotionEvent event) {
         return mUnityPlayer.injectEvent(event);
     }
+
 }
