@@ -15,10 +15,22 @@
     </fragment>
 
     <fragment
+        android:id="@+id/navigation_planner"
+        android:name="edu.singaporetech.ict3104.project.fragment.PlannerFragment"
+        android:label="@string/nav_planner"
+        tools:layout="@layout/fragment_planner" />
+
+    <fragment
         android:id="@+id/navigation_settings"
         android:name="edu.singaporetech.ict3104.project.fragment.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/navigation_place"
+        android:name="edu.singaporetech.ict3104.project.fragment.PlaceOfInterestFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_place_of_interest" />
 
     <fragment
         android:id="@+id/augmentedRealityFragment"
@@ -30,4 +42,9 @@
             app:destination="@id/navigation_map" />
     </fragment>
 
+    <fragment
+        android:id="@+id/weather_fragment"
+        android:name="edu.singaporetech.ict3104.project.fragment.WeatherFragment"
+        android:label="WeatherFragment"
+        tools:layout="@layout/fragment_weather" />
 </navigation>

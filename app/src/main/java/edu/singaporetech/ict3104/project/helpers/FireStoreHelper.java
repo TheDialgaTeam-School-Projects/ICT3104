@@ -23,8 +23,7 @@ public final class FireStoreHelper {
 
     public static Task<Void> setOrUpdateUserData(String email, Map<String, Object> userData) {
         if (email == null) return Tasks.forException(new NullPointerException("email is null."));
-        if (userData == null)
-            return Tasks.forException(new NullPointerException("userData is null."));
+        if (userData == null) return Tasks.forException(new NullPointerException("userData is null."));
 
         final DocumentReference userDataDocumentReference = FirebaseFirestore.getInstance()
                 .collection(USER_DATA_COLLECTION)

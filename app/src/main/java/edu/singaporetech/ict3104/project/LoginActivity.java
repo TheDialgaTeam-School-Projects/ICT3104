@@ -15,10 +15,14 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import edu.singaporetech.ict3104.project.fragment.SettingsFragment;
 import edu.singaporetech.ict3104.project.helpers.KeyboardHelper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -34,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText editTextLoginEmailAddress;
     private EditText editTextLoginPassword;
     private SharedPreferences sharedPreferences;
+
+    String FireBaseUserRole;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -119,9 +125,28 @@ public class LoginActivity extends AppCompatActivity {
                             .putString(PASSWORD_KEY, password)
                             .apply();
 
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra(MainActivity.INTENT_USER_EMAIL, email);
-                    startActivity(intent);
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    DocumentReference docRef = db.collection("Users").document(email);
+                    docRef.get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                FireBaseUserRole = document.getString("Role");
+                                if (FireBaseUserRole.equals("T"))
+                                {
+                                    startActivity(new Intent(getApplicationContext(), PlannerMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
+                                }
+                                else
+                                {
+                                    startActivity(new Intent(getApplicationContext(), UserMainActivity.class).putExtra(SettingsFragment.INTENT_USER_EMAIL, email));
+                                }
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    });
                 });
     }
 }

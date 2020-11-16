@@ -66,7 +66,6 @@ public class DirectionRoute extends Application {
     private void buildListofPolylinefromDirectionsURL(String url) {
         location_step_list=new ArrayList<>();
         wholeList= new ArrayList<>();
-        List<LocationSteps> tlist = new ArrayList<>();
         try {
             URL url2 = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
@@ -96,15 +95,16 @@ public class DirectionRoute extends Application {
                         polylineoption.addAll(PolyUtil.decode(poly));
                         listpolyline.add(polylineoption);
 
-                        JSONObject obj = steps.getJSONObject(i);
+                        JSONObject obj = steps.getJSONObject(j);
                         JSONObject start_location= obj.getJSONObject("start_location");
                         JSONObject end_location= obj.getJSONObject("end_location");
                         LatLng start_loc=new LatLng(start_location.getDouble("lat"),start_location.getDouble("lng"));
                         LatLng end_loc=new LatLng(end_location.getDouble("lat"),end_location.getDouble("lng"));
+                        String html = obj.getString("html_instructions");
                         listlocationstep.add(new LocationSteps(obj.getJSONObject("duration").getInt("value"),start_loc,end_loc,obj.getJSONObject("distance").getInt("value"),obj.getString("html_instructions"),obj.getJSONObject("polyline").getString("points")));
 
                     }
-                    location_step_list.add(tlist);
+                    location_step_list.add(listlocationstep);
                     wholeList.add(listpolyline);
                 }
 

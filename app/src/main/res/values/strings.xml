@@ -32,4 +32,19 @@
     <string name="resetMap">Reset Map</string>
     <string name="arNavigation">3D Navigation</string>
     <string name="startRoute">Start Route</string>
+    <string name="permission_missing">Required permission is not granted. AR view could not be initialized.</string>
+    <string name="Place_of_interest">Place of Interest</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    
+    <string-array name="placeOfInterest">
+        <item>item 1</item>
+        <item>item 2 </item>
+        <item>item 3 </item>
+        <item>item 4</item>
+        <item>item 5</item>
+
+    </string-array>
+    
 </resources>
