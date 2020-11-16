@@ -47,5 +47,4 @@
         android:name="edu.singaporetech.ict3104.project.fragment.WeatherFragment"
         android:label="WeatherFragment"
         tools:layout="@layout/fragment_weather" />
-
 </navigation>
