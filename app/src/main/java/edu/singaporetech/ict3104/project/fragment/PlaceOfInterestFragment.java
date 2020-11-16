@@ -101,8 +101,6 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
 
         EditText eTnameOfplace = view.findViewById(R.id.nameofplace);
 
-        String nameOfplace = eTnameOfplace.getText().toString();
-
 //        Button button_add_place_of_Interest = view.findViewById(R.id.add_btn);
 //        button_add_place_of_Interest.setOnClickListener(v -> {
 //            startActivity(new Intent(this, MapFragment.class));
@@ -123,7 +121,7 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
                 data.put("Item", spinner.getSelectedItem());
                 data.put("Lat", curLocation.getLatitude());
                 data.put("Long", curLocation.getLongitude());
-                data.put("Name", nameOfplace);
+                data.put("Name", eTnameOfplace.getText().toString());
 
                 db.collection("POI").document().set(data);
             }
@@ -134,9 +132,7 @@ public class PlaceOfInterestFragment extends Fragment implements LocationListene
     @Override
     public void onLocationChanged(Location newLocation) {
         curLocation=newLocation;
-        Toast.makeText(getActivity(),String.valueOf(curLocation.getLongitude() )+ String.valueOf(curLocation.getLatitude()),Toast.LENGTH_SHORT).show();
-
-
+        //Toast.makeText(getActivity(), curLocation.getLongitude() + String.valueOf(curLocation.getLatitude()),Toast.LENGTH_SHORT).show();
     }
 
     @Override
