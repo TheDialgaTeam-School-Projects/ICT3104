@@ -42,9 +42,4 @@
             app:destination="@id/navigation_map" />
     </fragment>
 
-    <fragment
-        android:id="@+id/weather_fragment"
-        android:name="edu.singaporetech.ict3104.project.fragment.WeatherFragment"
-        android:label="WeatherFragment"
-        tools:layout="@layout/fragment_weather" />
 </navigation>
