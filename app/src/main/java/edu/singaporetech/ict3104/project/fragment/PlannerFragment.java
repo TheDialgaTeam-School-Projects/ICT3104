@@ -87,15 +87,30 @@ public class PlannerFragment extends Fragment implements View.OnClickListener {
                                 Long getAge = document.getLong("Age");
                                 //convert to int
                                 int getAgeInt = Math.toIntExact(getAge);
+
+                                //retrieve commuteMethod
+                                String w = "walking";
+                                String wc = "wheelchair";
+                                String pwp ="parent with pram";
                                 String getCommuteMethod = document.getString("CommuteMethod");
-                                char getCM_Char = getCommuteMethod.charAt(0);
+                                //shorten for display
+                                if (getCommuteMethod.equalsIgnoreCase(w)) {
+                                    getCommuteMethod = "W";
+                                }
+                                if (getCommuteMethod.equalsIgnoreCase(wc)) {
+                                    getCommuteMethod = "WC";
+                                }
+                                if (getCommuteMethod.equalsIgnoreCase(pwp)){
+                                    getCommuteMethod = "PwP";
+                                }
+                                //String getCMName =  getCommuteMethod.charAt(0);
 
                                 String getGender = document.getString("Gender");
                                 char getGender_Char = getGender.charAt(0);
 
-                                feature featureObject = new feature(getFeatureN, getFRInt, getAgeInt, getGender_Char, getCM_Char);
-                                featureList.add(featureObject);
 
+                                feature featureObject = new feature(getFeatureN, getFRInt, getAgeInt, getGender_Char, getCommuteMethod);
+                                featureList.add(featureObject);
                             }
                             ListView mListView = (ListView) view.findViewById(R.id.planner_listview);
                             FeatureListAdapter adapter = new FeatureListAdapter(getActivity(), R.layout.adapter_view_layout, featureList);
@@ -174,7 +189,7 @@ public class PlannerFragment extends Fragment implements View.OnClickListener {
         Collections.sort(featureList, new Comparator<feature>() {
             @Override
             public int compare(feature o1, feature o2) {
-                return o1.getUser_method() - (o2.getUser_method());
+                return o1.getUser_method().compareTo(o2.getUser_method());
             }
         });
         mListView.setAdapter(adapter);

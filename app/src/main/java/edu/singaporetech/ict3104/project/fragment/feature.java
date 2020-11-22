@@ -7,9 +7,9 @@ public class feature{
      int feature_rating;
      int user_age;
      char user_gender;
-     char user_method;
+     String user_method;
 
-    public feature(String feature_name, int feature_rating,int user_age , char user_gender ,char user_method){
+    public feature(String feature_name, int feature_rating,int user_age , char user_gender ,String user_method){
         this.feature_name = feature_name;
         this.feature_rating = feature_rating;
         this.user_age = user_age;
@@ -44,10 +44,10 @@ public class feature{
     public void setUser_gender(char user_gender){
         this.user_gender = user_gender;
     }
-    public char getUser_method(){
+    public String getUser_method(){
         return this.user_method;
     }
-    public void setUser_method(char user_method){
+    public void setUser_method(String user_method){
         this.user_method = user_method;
     }
 

@@ -30,7 +30,7 @@ public class FeatureListAdapter extends ArrayAdapter<feature> {
         int rating = getItem(position).getFeature_rating();
         int age = getItem(position).getUser_age();
         char gender = getItem(position).getUser_gender();
-        char method = getItem(position).getUser_method();
+        String method = getItem(position).getUser_method();
         //create the feature object with the info
 
         feature feature = new feature(name, rating, age, gender, method);
@@ -48,7 +48,7 @@ public class FeatureListAdapter extends ArrayAdapter<feature> {
         featureRating.setText(Integer.toString(rating));
         featureAge.setText(Integer.toString(age));
         featureGender.setText(Character.toString(gender));
-        featureMethod.setText(Character.toString(method));
+        featureMethod.setText(method);
 
         return convertView;
     }
