@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="100">
+
+    <TextView
+        android:id="@+id/feature_name"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="30dp"
+        android:gravity="center_vertical"
+        android:layout_weight="25"
+        android:text="Lamp"/>
+
+    <TextView
+        android:gravity="center_vertical"
+        android:id="@+id/feature_rating"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="10"
+        android:text="5"/>
+
+    <TextView
+        android:id="@+id/feature_age"
+        android:gravity="center_vertical"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
+        android:text="21"/>
+    <TextView
+        android:id="@+id/gender"
+        android:gravity="center_vertical"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="M"/>
+    <TextView
+        android:id="@+id/commute_method"
+        android:gravity="center_vertical"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="10dp"
+        android:text="W"/>
+</LinearLayout>
+
