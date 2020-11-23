@@ -552,7 +552,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         TYPE.add("transit_station");
         List<Places> placeslist = new ArrayList<Places>();
         for (int i = 0; i < TYPE.size(); i++) {
-            //placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
+            placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
         }
         return placeslist;
     }
