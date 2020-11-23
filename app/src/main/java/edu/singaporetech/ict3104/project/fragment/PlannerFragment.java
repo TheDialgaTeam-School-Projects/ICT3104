@@ -88,12 +88,12 @@ public class PlannerFragment extends Fragment implements View.OnClickListener {
                                 //convert to int
                                 int getAgeInt = Math.toIntExact(getAge);
 
-                                //retrieve commuteMethod
+                                //retrieve commuteMethod from firebase
                                 String w = "walking";
                                 String wc = "wheelchair";
                                 String pwp ="parent with pram";
                                 String getCommuteMethod = document.getString("CommuteMethod");
-                                //shorten for display
+                                //shorten for display into planner list fragment
                                 if (getCommuteMethod.equalsIgnoreCase(w)) {
                                     getCommuteMethod = "W";
                                 }
