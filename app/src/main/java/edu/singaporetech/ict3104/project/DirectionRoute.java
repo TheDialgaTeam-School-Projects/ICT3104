@@ -48,18 +48,18 @@ public class DirectionRoute extends Application {
         return location_step_list;
     }
     public void getAlternateRoute(){
-        getListOfPolyLineFromAlternative("Walking");
+        getListOfPolyLineFromAlternative("walking");
     }
 
     private void getListOfPolyLineFromAlternative(String modeselection){
         String origin = "origin=" + firstMile.latitude + "," + firstMile.longitude+"&";
         String dest = "destination=" + lastMile.latitude + "," + lastMile.longitude+"&";
         String key = "key=" +this.key;
-        String sensor = "sensor=false"+"&";
         String mode = "mode="+modeselection+"&";
         String alternative = "alternatives=true&";
-        String avoid = "avoid=highways"+"&";
-        String params = origin.concat(dest).concat(avoid).concat(mode).concat(alternative).concat(key);
+
+//        String avoid = "avoid=highways"+"&";
+        String params = origin.concat(dest).concat(mode).concat(alternative).concat(key);
         // return "https://maps.googleapis.com/maps/api/directions/json?".concat(params);
         buildListofPolylinefromDirectionsURL("https://maps.googleapis.com/maps/api/directions/json?".concat(params));
     }

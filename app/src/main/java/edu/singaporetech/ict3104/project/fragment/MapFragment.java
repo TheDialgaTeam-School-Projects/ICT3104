@@ -3,7 +3,6 @@ package edu.singaporetech.ict3104.project.fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -25,15 +24,12 @@ import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
 import edu.singaporetech.ict3104.project.helpers.FireStoreHelper;
 
-import android.os.Debug;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -62,7 +58,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.JsonArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,28 +68,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-import edu.singaporetech.ict3104.project.DirectionRoute;
-import edu.singaporetech.ict3104.project.LocationSteps;
-import edu.singaporetech.ict3104.project.PlaceOfInterest;
-import edu.singaporetech.ict3104.project.Places;
-import edu.singaporetech.ict3104.project.R;
-import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -108,7 +89,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private String  age;
     private String email,gender,commuteMethod;
     private static final float DEFAULT_ZOOM = 15.0f;
-    private static final String EMAIL_ADDRESS_KEY = "EMAIL_ADDRESS_KEY";
     public static int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     MarkerOptions markerOptions;
     Marker myMarker;
@@ -128,7 +108,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     List<Marker> listofPOIMarker;
     List<PlaceOfInterest> listofpoi;
     RelativeLayout ratingLayout;
-    TextView tvfeatureName,tv_degree ;
+    TextView tvfeatureName,tv_degree;
     Spinner spinnerRating;
     RatingBar rbFeature;
     int markerclickmode = 0;
@@ -142,6 +122,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private Handler mHandler;
     private int mInterval = 60000; // 5 seconds by default, can be changed later
     int range=300;
+    private String googleApiKey;
     public void increaseRange(){
         if (range>3000){
             range =300;
@@ -157,7 +138,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return inflater.inflate(R.layout.fragment_map, container, false);    }
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
         getAllPOIfromdb();
@@ -243,6 +223,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 polyline.add(tpoly);
             }
         });
+        googleApiKey = requireContext().getString(R.string.google_maps_key);
         return rootView;
     }
 
@@ -552,7 +533,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         TYPE.add("transit_station");
         List<Places> placeslist = new ArrayList<Places>();
         for (int i = 0; i < TYPE.size(); i++) {
-            //placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
+            placeslist.addAll(buildNearbyPlacesURL(mycurrent, TYPE.get(i)));
         }
         return placeslist;
     }
@@ -564,7 +545,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
             try {
                 InputStream in = new BufferedInputStream(connection.getInputStream());
-                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                 StringBuilder responseStrBuilder = new StringBuilder();
 
                 String inputStr;
@@ -601,7 +582,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         String location = "location=" + current.latitude + "," + current.longitude + "&";
         String radius = "radius" + "=500" + "&";
         String type = "type=" + transporttype + "&";
-        String key = "key=" + getText(R.string.google_maps_key);
+        String key = "key=" +  googleApiKey;
         String params = location.concat(radius).concat(type).concat(key);
         return getListofLocationsNearby("https://maps.googleapis.com/maps/api/place/nearbysearch/json?".concat(params));
         //return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?".concat(params);
@@ -610,21 +591,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void startJourney() {
         if (selectedLocation != null) {
             new AlertDialog.Builder(getContext()).setTitle("Start Journey??").setMessage("You would have to reset map if you wish to change destination?").setIcon(android.R.drawable.ic_dialog_alert)
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
-                            List<PolylineOptions> selectedroute = listofAlternateRoute.get(selectedRoute);
-                            clearrbgList();
-                            setStartJourneyButton(false);
-                            List<List<LocationSteps>> list = R1.getLocationStepList();
-                            //Pass to AR FROM HERE
-                            toggleMarkermode();
-                            hideAllMarkers(listofmarker);
-                            showAllMarkers(listofPOIMarker);
-//                            AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
-//                            AugmentedRealityFragment.currentLocationStepIndex = 0;
-//                            ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
-                        }
+                    .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                        Toast.makeText(getActivity(), "Destination Set!", Toast.LENGTH_SHORT).show();
+                        clearrbgList();
+                        setStartJourneyButton(false);
+                        List<List<LocationSteps>> list = R1.getLocationStepList();
+                        //Pass to AR FROM HERE
+                        toggleMarkermode();
+                        hideAllMarkers(listofmarker);
+                        showAllMarkers(listofPOIMarker);
+                        AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
+                        AugmentedRealityFragment.polylineOptionsList = R1.getRouteList().get(selectedRoute);
+                        AugmentedRealityFragment.currentLocationStepIndex = 0;
+                        ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_navigation_map_to_augmentedRealityFragment);
                     })
                     .setNegativeButton(android.R.string.no, null).show();
         }
@@ -725,27 +704,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    public Boolean doInBackground(List<LocationSteps> input) {
-        //publishProgress();
-        List<LatLng> list = new ArrayList<>();
-        for (int i = 0; i < input.size(); i++) {
-            list.add(input.get(i).getStart_location());
-            list.add(input.get(i).getEnd_location());
-        }
-        //List<LatLng> list = list[0];
-        getDeviceLocation();
-        LatLng currentPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-        for (int i = 1; i < list.size(); i++) {
-            double t = obtainDistance(currentPosition, list.get(i), 'K');
-            if (obtainDistance(currentPosition, list.get(i), 'K') <= 0.2) {
-                //AS long as there is one there is within 0.5km Deem okay
-                return false;
-            }
-        }
-        return true;
-    }
-
-
 
     public void toggleRatingLayout() {
         if (ratingLayout.getVisibility() == RelativeLayout.GONE) {
@@ -753,39 +711,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         } else {
             ratingLayout.setVisibility(RelativeLayout.GONE);
         }
-    }
-
-    //M for Miles , K for kilometers , N for Nautical Miles
-    private double obtainDistance(LatLng loc1, LatLng loc2, char unit) {
-        double lat1 = loc1.latitude;
-        double lon1 = loc1.longitude;
-        double lat2 = loc2.latitude;
-        double lon2 = loc2.longitude;
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        if (unit == 'K') {
-            dist = dist * 1.609344;
-        } else if (unit == 'N') {
-            dist = dist * 0.8684;
-        }
-        return (dist);
-    }
-
-    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-    /*::  This function converts decimal degrees to radians             :*/
-    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-    private double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-    /*::  This function converts radians to decimal degrees             :*/
-    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-    private double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
     }
 
     @Override
@@ -859,17 +784,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         Log.i("UPDATE", "MyClass.getView() — get item number $position");
         getweatherstatus();
         double kelvin = 273.15;
-        df.format(temp-kelvin);
-//        tv_degree.setText(String.format("%s°C", Double.toString(temp-kelvin)));
-        tv_degree.setText(String.format("%s°C", Double.toString(Double.parseDouble(df.format(temp-kelvin)))));
-        if (wheathercondition.equals("Clouds")){
+        df.format(temp - kelvin);
+        tv_degree.setText(String.format("%s°C", Double.parseDouble(df.format(temp - kelvin))));
+        if (wheathercondition.equals("Clouds")) {
             iv_weather.setImageResource(R.drawable.ic_baseline_cloud_24);
-        }else if (wheathercondition.equals("Rain")){
+        } else if (wheathercondition.equals("Rain")) {
             iv_weather.setImageResource(R.drawable.ic_baseline_rain_24);
-        }else{
+        } else {
             iv_weather.setImageResource(R.drawable.ic_baseline_ac_unit_24);
-
         }
-
     }
 }
