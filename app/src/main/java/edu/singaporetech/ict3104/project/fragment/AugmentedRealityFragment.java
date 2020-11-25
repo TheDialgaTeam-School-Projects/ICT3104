@@ -15,24 +15,47 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import edu.singaporetech.ict3104.java_to_unity_proxy.NavigationManager;
 import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.LocationSteps;
+import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
@@ -50,7 +73,13 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
     private FrameLayout frameLayout;
     private MapView mapView;
 
+    private TextView tv_degree;
+    private ImageView iv_weather;
+    private List<PlaceOfInterest> listofpoi=new ArrayList<>();
+    private List<Marker> listofPOIMarker=new ArrayList<>();
     private GoogleMap googleMap;
+    private double temp=0;
+    private String wheathercondition;
 
     @Nullable
     @Override
@@ -107,6 +136,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         mapView.getMapAsync(this);
+        tv_degree = view.findViewById(R.id.tv_degree);
+        iv_weather = view.findViewById(R.id.iv_weather);
     }
 
     @Override
@@ -171,6 +202,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
         NavigationManager.setDistanceRemaining(location.distanceTo(endLocation));
         NavigationManager.setTargetAzimuth(location.bearingTo(endLocation));
+        updatePOILIST(location);
+        updateWeather(); //this function can change value of mInterval.
     }
 
     @Override
@@ -196,5 +229,99 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         for (final PolylineOptions polylineOptions: polylineOptionsList) {
             googleMap.addPolyline(polylineOptions);
         }
+    }
+    public void getAllPOIfromdb() {
+        listofpoi = new ArrayList<>();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collectionGroup("POI").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                //Iterate to get the products out of the queryDocumentSnapshots object
+                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                    listofpoi.add(new PlaceOfInterest(document.getString("Name"), document.getDouble("Lat"), document.getDouble("Long"), document.getString("Item")));
+                }
+            }
+        });
+
+    }
+    public void updatePOILIST(Location location){
+        for (int j = 0; j < listofPOIMarker.size(); j++) {
+            listofPOIMarker.get(j).remove();
+        }
+        if (listofpoi.size() != 0) {
+            for (int i = 0; i < listofpoi.size(); i++) {
+                PlaceOfInterest cur = listofpoi.get(i);
+                Location test = new Location("");
+                test.setLatitude(cur.getLatitude());
+                test.setLongitude(cur.getLongitude());
+                if (location.distanceTo(test)<300) {
+                    Marker m;
+                    String title = cur.getFeaturename().substring(0, Math.min(cur.getFeaturename().length(), 34));
+                    if(cur.getTag().equals("Staircase")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.staircase)));
+                    }else if(cur.getTag().equals("Ramp")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.ramp)));
+                    }else if(cur.getTag().contains("Path")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.path)));
+                    }else if(cur.getTag().equals("Bollard")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bollard)));
+                    }else if(cur.getTag().equals("Bench")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bench)));
+                    }else if(cur.getTag().equals("Fencing")){
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.fence)));
+                    }else {
+                        m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.place_of_interest)));
+                    }
+                    listofPOIMarker.add(m);
+                }
+            }
+        }
+
+        getAllPOIfromdb();
+    }
+    public void updateWeather(){
+        Log.i("UPDATE", "MyClass.getView() — get item number $position");
+        getweatherstatus();
+        double kelvin = 273.15;
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.format(temp - kelvin);
+        tv_degree.setText(String.format("%s°C", Double.parseDouble(df.format(temp - kelvin))));
+        if (wheathercondition.equals("Clouds")) {
+            iv_weather.setImageResource(R.drawable.ic_baseline_cloud_24);
+        } else if (wheathercondition.equals("Rain")) {
+            iv_weather.setImageResource(R.drawable.ic_baseline_rain_24);
+        } else {
+            iv_weather.setImageResource(R.drawable.ic_baseline_ac_unit_24);
+        }
+    }
+    public void getweatherstatus(){
+
+        try{
+            String apiLink="https://api.openweathermap.org/data/2.5/weather?q=singapore&appid=f5d4780942ffeb755aea90cf2df24e69";
+            URL url2 = new URL(apiLink);
+            HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
+            try{
+                InputStream in = new BufferedInputStream(connection.getInputStream());
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
+                String response = responseStrBuilder.toString();
+                JSONObject jsonObject = new JSONObject(response);
+                JSONObject main = jsonObject.getJSONObject("main");
+                temp = main.getDouble("temp");
+                JSONArray weather = jsonObject.getJSONArray("weather");
+                JSONObject firstobject = weather.getJSONObject(0);
+                wheathercondition = firstobject.getString("main");
+            }
+            finally
+            {
+                connection.disconnect();
+            }
+        }catch(IOException | JSONException e) {
+            String t = e.getMessage();
+        }
+
     }
 }
