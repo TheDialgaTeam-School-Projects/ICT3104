@@ -105,13 +105,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     RadioGroup rbg_RouteList;
     List<List<PolylineOptions>> listofAlternateRoute;
     int selectedRoute;
-    List<Marker> listofPOIMarker;
-    List<PlaceOfInterest> listofpoi;
-    RelativeLayout ratingLayout;
-    TextView tvfeatureName,tv_degree;
-    Spinner spinnerRating;
-    RatingBar rbFeature;
-    int markerclickmode = 0;
+    TextView tv_degree;
     ImageView iv_weather;
     private GoogleMap mMap;
     private Thread mythread;
@@ -121,80 +115,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     DecimalFormat df = new DecimalFormat("#.#");
     private Handler mHandler;
     private int mInterval = 60000; // 5 seconds by default, can be changed later
-    int range=300;
     private String googleApiKey;
-    public void increaseRange(){
-        if (range>3000){
-            range =300;
-        }else{
-            range+=300;
-        }
-
-    }
     public MapFragment() {
         // Required empty public constructor
     }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
-        getAllPOIfromdb();
-        listofPOIMarker = new ArrayList<>();
         listofmarker = new ArrayList<>();
-        ratingLayout = rootView.findViewById(R.id.ratingLayout);
-        tvfeatureName = rootView.findViewById(R.id.tvfeatureName);
         tv_degree = rootView.findViewById(R.id.tv_degree);
         iv_weather = rootView.findViewById(R.id.iv_weather);
         mHandler = new Handler();
         startRepeatingTask();
-        rbFeature = rootView.findViewById(R.id.rbFeature);
-        rbFeature.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                Toast.makeText(getContext(),String.valueOf(rating),Toast.LENGTH_SHORT).show();
-                String tag="";
-                for(int i=0; i <listofpoi.size();i++){
-                    if (tvfeatureName.getText().toString().equals(listofpoi.get(i).getFeaturename())){
-                        tag = listofpoi.get(i).getTag();
-                    }
-                }
-                switch(commuteMethod){
-                    case "Walking":
-                        commuteMethod="W";
-                        break;
-                    case "Parent with Pram":
-                        commuteMethod="PP";
-                        break;
-                    case "Wheelchair":
-                        commuteMethod="WC";
-                        break;
-                    case "Parent":
-                        commuteMethod="P";
-                        break;
-                }
-                switch(gender){
-                    case "Male":
-                        gender="M";
-                        break;
-                    case "Female":
-                        gender="F";
-                        break;
-                }
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                Map<String, Object> data = new HashMap<>();
-                data.put("Age", Integer.parseInt(age));
-                data.put("CommuteMethod", commuteMethod);
-                data.put("FeatureName", tag);
-                data.put("FeatureR", rating);
-                data.put("Gender",gender);
-                db.collection("Survey").document().set(data);
-                toggleRatingLayout();
-                Toast.makeText(getActivity(), "Submitted!", Toast.LENGTH_SHORT).show();
-            }
-        });
-        toggleRatingLayout();
         rbg_RouteList = rootView.findViewById(R.id.rbg_RouteList);
         btnOpenARNavigation = rootView.findViewById(R.id.btnOpenARNavigation);
         btnReset = rootView.findViewById(R.id.btnReset);
@@ -223,6 +157,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 polyline.add(tpoly);
             }
         });
+
         googleApiKey = requireContext().getString(R.string.google_maps_key);
         return rootView;
     }
@@ -235,8 +170,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         clearPath();
         clearrbgList();
         setStartJourneyButton(false);
-        markerclickmode=0;
-        ratingLayout.setVisibility(RelativeLayout.GONE);
 
     }
 
@@ -248,95 +181,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapView.onResume();
         mMapView.getMapAsync(this);
         setStartJourneyButton(false);
+        final BaseActivity activity = (BaseActivity) requireActivity();
+        if (requireContext().checkSelfPermission(BaseActivity.CAMERA_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (requireContext().checkSelfPermission(BaseActivity.FINE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (requireContext().checkSelfPermission(BaseActivity.COARSE_LOCATION_PERMISSION) == PackageManager.PERMISSION_DENIED) {
+            activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
+            Toast.makeText(requireContext(), R.string.permission_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+        mLocationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 
     }
 
-    public void getAllPOIfromdb() {
-        listofpoi = new ArrayList<>();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collectionGroup("POI").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                //Iterate to get the products out of the queryDocumentSnapshots object
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    listofpoi.add(new PlaceOfInterest(document.getString("Name"), document.getDouble("Lat"), document.getDouble("Long"), document.getString("Item")));
-//                    Log.d("FIREBASE", document.getId() + " => " + document.getDouble("Lat")+ " Lng" + document.getDouble("Long"));
-                }
-            }
-        });
 
-    }
 
     @Override
     public void onLocationChanged(Location newLocation) {
         lastKnownLocation=newLocation;
-        //Clear listofPOIMarker,then re add
-        for (int j = 0; j < listofPOIMarker.size(); j++) {
-            listofPOIMarker.get(j).remove();
-        }
-        listofPOIMarker = new ArrayList<>();
-        if (listofpoi.size() != 0) {
-            for (int i = 0; i < listofpoi.size(); i++) {
-                PlaceOfInterest cur = listofpoi.get(i);
-                Location test = new Location("");
-                test.setLatitude(cur.getLatitude());
-                test.setLongitude(cur.getLongitude());
-                if (newLocation.distanceTo(test)<500) {
-                    Marker m;
-                    String title = cur.getFeaturename().substring(0, Math.min(cur.getFeaturename().length(), 34));
-                    if(cur.getTag().equals("Staircase")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.staircase)));
-                    }else if(cur.getTag().equals("Ramp")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.ramp)));
-                    }else if(cur.getTag().contains("Path")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.path)));
-                    }else if(cur.getTag().equals("Bollard")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bollard)));
-                    }else if(cur.getTag().equals("Bench")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bench)));
-                    }else if(cur.getTag().equals("Fencing")){
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.fence)));
-                    }else {
-                        m = mMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.place_of_interest)));
-                    }
-                    listofPOIMarker.add(m);
-                    listofPOIMarker.get(listofPOIMarker.size()-1).setVisible(false);
-                }
-            }
-            increaseRange();
+        CreateMarkers(populateListofNearbyPlaces(newLocation));
 
-        }
-
-
-        if (markerclickmode == 0) {
-            if(listofmarker!=null){
-                for (int i = 0; i < listofmarker.size(); i++) {
-                    listofmarker.get(i).remove();
-                }
-                CreateMarkers(populateListofNearbyPlaces(newLocation));
-            }
-            hideAllMarkers(listofPOIMarker);
-            showAllMarkers(listofmarker);
-
-        } else if (markerclickmode == 1) {
-            hideAllMarkers(listofmarker);
-            showAllMarkers(listofPOIMarker);
-        }
 
     }
 
-    public void hideAllMarkers(List<Marker> input) {
-        for (int i = 0; i < input.size(); i++) {
-            input.get(i).setVisible(false);
-        }
-    }
-
-    public void showAllMarkers(List<Marker> input) {
-        for (int i = 0; i < input.size(); i++) {
-            input.get(i).setVisible(true);
-
-        }
-    }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -430,7 +308,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng arg0) {
-                if (markerclickmode == 0) {
                     new AlertDialog.Builder(getContext()).setTitle("Set Destination?").setMessage("Do you really want to travel here?").setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
@@ -456,7 +333,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             .setNegativeButton(android.R.string.no, null).show();
                 }
 
-            }
         });
         getLocationPermission();
         getDeviceLocation();
@@ -476,7 +352,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             LatLng sl = new LatLng(t.getLatitude(), t.getLongitude());
             MarkerOptions tmarkerOptions = new MarkerOptions().position(sl).title(t.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.transit_station));
             listofmarker.add(mMap.addMarker(tmarkerOptions));
-            listofmarker.get(i).setVisible(false);
+//            listofmarker.get(i).setVisible(false);
         }
     }
 
@@ -504,26 +380,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             }
 
         }
-        //Clicking a feature
-        for (int i = 0; i < listofPOIMarker.size(); i++) {
-            if (marker.equals(listofPOIMarker.get(i))) {
-                tvfeatureName.setText(marker.getTitle());
-                rbFeature.setStepSize(0.1f);
-                ratingLayout.setVisibility(RelativeLayout.VISIBLE);
-            }
-
-
-        }
         return true;
     }
 
-    public void toggleMarkermode() {
-        if (markerclickmode == 0) {
-            markerclickmode = 1;
-        } else {
-            markerclickmode = 0;
-        }
-    }
 
     private List<Places> populateListofNearbyPlaces(Location location) {
         LatLng mycurrent = new LatLng(location.getLatitude(), location.getLongitude());
@@ -597,9 +456,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                         setStartJourneyButton(false);
                         List<List<LocationSteps>> list = R1.getLocationStepList();
                         //Pass to AR FROM HERE
-                        toggleMarkermode();
-                        hideAllMarkers(listofmarker);
-                        showAllMarkers(listofPOIMarker);
                         AugmentedRealityFragment.locationSteps = list.get(selectedRoute);
                         AugmentedRealityFragment.polylineOptionsList = R1.getRouteList().get(selectedRoute);
                         AugmentedRealityFragment.currentLocationStepIndex = 0;
@@ -705,13 +561,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
 
-    public void toggleRatingLayout() {
-        if (ratingLayout.getVisibility() == RelativeLayout.GONE) {
-            ratingLayout.setVisibility(RelativeLayout.VISIBLE);
-        } else {
-            ratingLayout.setVisibility(RelativeLayout.GONE);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
