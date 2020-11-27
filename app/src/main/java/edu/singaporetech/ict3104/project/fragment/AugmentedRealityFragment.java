@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,21 +53,28 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import edu.singaporetech.ict3104.java_to_unity_proxy.NavigationManager;
+import edu.singaporetech.ict3104.java_to_unity_proxy.ObjectListener;
+import edu.singaporetech.ict3104.java_to_unity_proxy.ObjectListenerManager;
 import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
 
-public class AugmentedRealityFragment extends Fragment implements LocationListener, OnMapReadyCallback {
+public class AugmentedRealityFragment extends Fragment implements LocationListener, OnMapReadyCallback, ObjectListener {
 
     public static List<LocationSteps> locationSteps = new ArrayList<>();
     public static List<PolylineOptions> polylineOptionsList = new ArrayList<>();
     public static int currentLocationStepIndex = 0;
 
+    private final List<Location> locationHistory = new ArrayList<>();
+
     private PositionSensor positionSensor;
     private LocationManager locationManager;
+
+    private NavController navController;
 
     private FrameLayout frameLayout;
     private MapView mapView;
@@ -90,7 +98,6 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         return inflater.inflate(R.layout.fragment_augmented_reality, container, false);
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -130,6 +137,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 
+        navController = activity.getNavController();
+
         frameLayout = view.findViewById(R.id.unityLayout);
         frameLayout.addView(activity.getUnityPlayer().getView());
         activity.getUnityPlayer().resume();
@@ -143,6 +152,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         iv_weather = view.findViewById(R.id.iv_weather);
 
         textViewNavigationRoute = view.findViewById(R.id.textViewNavigationRoute);
+
+        ObjectListenerManager.registerListener(this);
     }
 
     @Override
@@ -170,6 +181,7 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
     public void onDestroy() {
         ((BaseActivity) requireActivity()).getUnityPlayer().pause();
         locationManager.removeUpdates(this);
+        ObjectListenerManager.clearListener();
         super.onDestroy();
     }
 
@@ -181,6 +193,19 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
+        locationHistory.add(location);
+
+        if (locationHistory.size() >= 5) {
+            locationHistory.remove(0);
+        }
+
+        location = locationHistory.stream().min((o1, o2) -> {
+            if (o1.getAccuracy() == o2.getAccuracy()) return 0;
+            return o1.getAccuracy() < o2.getAccuracy() ? -1 : 1;
+        }).orElse(location);
+
+        Log.d(AugmentedRealityFragment.class.getSimpleName(), location.toString());
+
         if (googleMap != null) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
         }
@@ -188,7 +213,7 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         if (currentLocationStepIndex >= AugmentedRealityFragment.locationSteps.size()) {
             Toast.makeText(requireContext(), "Location ended!", Toast.LENGTH_LONG).show();
             final Handler handler = new Handler(Looper.getMainLooper());
-            handler.postDelayed(() -> ((BaseActivity) requireActivity()).getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map), 1000);
+            handler.postDelayed(() -> navController.navigate(R.id.action_augmentedRealityFragment_to_navigation_map), 1000);
             locationManager.removeUpdates(this);
             return;
         }
@@ -240,6 +265,12 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         for (final PolylineOptions polylineOptions : polylineOptionsList) {
             googleMap.addPolyline(polylineOptions);
         }
+    }
+
+    @Override
+    public void invokeObjectListener() {
+        // Object on AR is pressed, do what?
+        Log.d(AugmentedRealityFragment.class.getSimpleName(), "Triggered");
     }
 
     public void getAllPOIfromdb() {

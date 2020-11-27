@@ -1,19 +1,18 @@
 ﻿using GoogleARCore;
 using UnityEngine;
-using UnityEngine.EventSystems;
+
+#if UNITY_EDITOR
+    using Input = GoogleARCore.InstantPreviewInput;
+#endif
 
 public class ARController : MonoBehaviour
 {
     /// <summary>
-    /// The first-person camera being used to render the passthrough camera image (i.e. AR
-    /// background).
-    /// </summary>
-    public Camera FirstPersonCamera;
-
-    /// <summary>
     /// A prefab to place when a raycast from a user touch hits a vertical plane.
     /// </summary>
-    public GameObject GameObjectPrefab;
+    public GameObject gameObjectPrefab;
+
+    private AndroidJavaClass _objectListenerManager;
 
     private void Awake()
     {
@@ -25,6 +24,8 @@ public class ARController : MonoBehaviour
         Screen.autorotateToLandscapeRight = false;
         Screen.autorotateToPortraitUpsideDown = false;
         Screen.orientation = ScreenOrientation.Portrait;
+
+        _objectListenerManager = new AndroidJavaClass("edu.singaporetech.ict3104.java_to_unity_proxy.ObjectListenerManager");
     }
 
     private void Update()
@@ -34,38 +35,34 @@ public class ARController : MonoBehaviour
 
         // If the player has not touched the screen, we are done with this update.
         Touch touch;
-        if (InstantPreviewInput.touchCount < 1 || (touch = InstantPreviewInput.GetTouch(0)).phase != TouchPhase.Began) return;
+        if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began) return;
 
-        // Should not handle input if the player is pointing on UI.
-        if (EventSystem.current.IsPointerOverGameObject(touch.fingerId)) return;
-
-        // Raycast against the location the player touched to search for planes.
-        const TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon | TrackableHitFlags.FeaturePointWithSurfaceNormal;
-
-        if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out var hit))
+        if (Physics.Raycast(Camera.current.ScreenPointToRay(new Vector3(touch.position.x, touch.position.y, 0)), out var _))
         {
-            // Use hit pose and camera pose to check if hittest is from the
-            // back of the plane, if it is, no need to create the anchor.
-            if (hit.Trackable is DetectedPlane && Vector3.Dot(FirstPersonCamera.transform.position - hit.Pose.position, hit.Pose.rotation * Vector3.up) < 0)
-            {
-                Debug.Log("Hit at back of the current DetectedPlane");
-            }
-            else
-            {
-                // Instantiate prefab at the hit pose.
-                var newGameObject = Instantiate(GameObjectPrefab, hit.Pose.position, hit.Pose.rotation);
-
-                // Compensate for the hitPose rotation facing away from the raycast (i.e.
-                // camera).
-                newGameObject.transform.Rotate(0, 180, 0, Space.Self);
-
-                // Create an anchor to allow ARCore to track the hitpoint as understanding of
-                // the physical world evolves.
-                var anchor = hit.Trackable.CreateAnchor(hit.Pose);
-
-                // Make game object a child of the anchor.
-                newGameObject.transform.parent = anchor.transform;
-            }
+            _objectListenerManager.CallStatic("invoke");
+            return;
         }
+
+        if (Frame.Raycast(touch.position.x, touch.position.y, TrackableHitFlags.Default, out var hit))
+        {
+            // Instantiate prefab at the hit pose.
+            var newGameObject = Instantiate(gameObjectPrefab, hit.Pose.position, hit.Pose.rotation);
+
+            // Compensate for the hitPose rotation facing away from the raycast (i.e.
+            // camera).
+            newGameObject.transform.Rotate(0, 180, 0, Space.Self);
+
+            // Create an anchor to allow ARCore to track the hitpoint as understanding of
+            // the physical world evolves.
+            var anchor = hit.Trackable.CreateAnchor(hit.Pose);
+
+            // Make game object a child of the anchor.
+            newGameObject.transform.parent = anchor.transform;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        _objectListenerManager.Dispose();
     }
 }
