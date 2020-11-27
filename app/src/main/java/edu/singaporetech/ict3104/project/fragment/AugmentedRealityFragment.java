@@ -1,16 +1,15 @@
 package edu.singaporetech.ict3104.project.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,10 +27,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -40,26 +41,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import edu.singaporetech.ict3104.java_to_unity_proxy.NavigationManager;
 import edu.singaporetech.ict3104.java_to_unity_proxy.PositionSensor;
 import edu.singaporetech.ict3104.project.LocationSteps;
 import edu.singaporetech.ict3104.project.PlaceOfInterest;
 import edu.singaporetech.ict3104.project.R;
 import edu.singaporetech.ict3104.project.activity.BaseActivity;
-
-import static android.content.Context.LOCATION_SERVICE;
 
 public class AugmentedRealityFragment extends Fragment implements LocationListener, OnMapReadyCallback {
 
@@ -75,11 +73,16 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
     private TextView tv_degree;
     private ImageView iv_weather;
-    private List<PlaceOfInterest> listofpoi=new ArrayList<>();
-    private List<Marker> listofPOIMarker=new ArrayList<>();
+
+    private TextView textViewNavigationRoute;
+
+    private List<PlaceOfInterest> listofpoi = new ArrayList<>();
+    private List<Marker> listofPOIMarker = new ArrayList<>();
     private GoogleMap googleMap;
-    private double temp=0;
+    private double temp = 0;
     private String wheathercondition;
+
+    private Date lastRequestedWeatherDateTime = Calendar.getInstance().getTime();
 
     @Nullable
     @Override
@@ -114,7 +117,6 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
             return;
         }
 
-
         // Assert that location steps is more than 0. If there isn't a location step, this view can't operate.
         if (locationSteps.size() < 1) {
             activity.getNavController().navigate(R.id.action_augmentedRealityFragment_to_navigation_map);
@@ -124,7 +126,7 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
         positionSensor = new PositionSensor(requireContext());
 
-        locationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
+        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 
@@ -136,8 +138,11 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         mapView.getMapAsync(this);
+
         tv_degree = view.findViewById(R.id.tv_degree);
         iv_weather = view.findViewById(R.id.iv_weather);
+
+        textViewNavigationRoute = view.findViewById(R.id.textViewNavigationRoute);
     }
 
     @Override
@@ -202,18 +207,24 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
         NavigationManager.setDistanceRemaining(location.distanceTo(endLocation));
         NavigationManager.setTargetAzimuth(location.bearingTo(endLocation));
+
+        textViewNavigationRoute.setText(HtmlCompat.fromHtml(locationSteps.getHtml_instructions(), HtmlCompat.FROM_HTML_MODE_COMPACT));
+
         updatePOILIST(location);
-        updateWeather(); //this function can change value of mInterval.
+        updateWeather();
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) { }
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) { }
+    public void onProviderDisabled(String provider) {
+    }
 
     @SuppressLint("MissingPermission")
     @Override
@@ -226,25 +237,23 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         googleMap.setBuildingsEnabled(true);
         googleMap.setTrafficEnabled(false);
 
-        for (final PolylineOptions polylineOptions: polylineOptionsList) {
+        for (final PolylineOptions polylineOptions : polylineOptionsList) {
             googleMap.addPolyline(polylineOptions);
         }
     }
+
     public void getAllPOIfromdb() {
         listofpoi = new ArrayList<>();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collectionGroup("POI").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                //Iterate to get the products out of the queryDocumentSnapshots object
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    listofpoi.add(new PlaceOfInterest(document.getString("Name"), document.getDouble("Lat"), document.getDouble("Long"), document.getString("Item")));
-                }
+        db.collectionGroup("POI").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            //Iterate to get the products out of the queryDocumentSnapshots object
+            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                listofpoi.add(new PlaceOfInterest(document.getString("Name"), document.getDouble("Lat"), document.getDouble("Long"), document.getString("Item")));
             }
         });
-
     }
-    public void updatePOILIST(Location location){
+
+    public void updatePOILIST(Location location) {
         for (int j = 0; j < listofPOIMarker.size(); j++) {
             listofPOIMarker.get(j).remove();
         }
@@ -254,22 +263,22 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
                 Location test = new Location("");
                 test.setLatitude(cur.getLatitude());
                 test.setLongitude(cur.getLongitude());
-                if (location.distanceTo(test)<300) {
+                if (location.distanceTo(test) < 300) {
                     Marker m;
                     String title = cur.getFeaturename().substring(0, Math.min(cur.getFeaturename().length(), 34));
-                    if(cur.getTag().equals("Staircase")){
+                    if (cur.getTag().equals("Staircase")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.staircase)));
-                    }else if(cur.getTag().equals("Ramp")){
+                    } else if (cur.getTag().equals("Ramp")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.ramp)));
-                    }else if(cur.getTag().contains("Path")){
+                    } else if (cur.getTag().contains("Path")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.path)));
-                    }else if(cur.getTag().equals("Bollard")){
+                    } else if (cur.getTag().equals("Bollard")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bollard)));
-                    }else if(cur.getTag().equals("Bench")){
+                    } else if (cur.getTag().equals("Bench")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.bench)));
-                    }else if(cur.getTag().equals("Fencing")){
+                    } else if (cur.getTag().equals("Fencing")) {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.fence)));
-                    }else {
+                    } else {
                         m = googleMap.addMarker(new MarkerOptions().position(new LatLng(test.getLatitude(), test.getLongitude())).title(title).icon(BitmapDescriptorFactory.fromResource(R.drawable.place_of_interest)));
                     }
                     listofPOIMarker.add(m);
@@ -279,9 +288,9 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
 
         getAllPOIfromdb();
     }
-    public void updateWeather(){
-        Log.i("UPDATE", "MyClass.getView() — get item number $position");
-        getweatherstatus();
+
+    public void updateWeather() {
+        getWeatherStatus();
         double kelvin = 273.15;
         DecimalFormat df = new DecimalFormat("#.#");
         df.format(temp - kelvin);
@@ -294,19 +303,28 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
             iv_weather.setImageResource(R.drawable.ic_baseline_ac_unit_24);
         }
     }
-    public void getweatherstatus(){
 
-        try{
-            String apiLink="https://api.openweathermap.org/data/2.5/weather?q=singapore&appid=f5d4780942ffeb755aea90cf2df24e69";
+    public void getWeatherStatus() {
+        if (Calendar.getInstance().getTime().after(lastRequestedWeatherDateTime)) {
+            final Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MINUTE, 30);
+            lastRequestedWeatherDateTime = calendar.getTime();
+        } else {
+            return;
+        }
+
+        try {
+            String apiLink = "https://api.openweathermap.org/data/2.5/weather?q=singapore&appid=f5d4780942ffeb755aea90cf2df24e69";
             URL url2 = new URL(apiLink);
             HttpURLConnection connection = (HttpURLConnection) url2.openConnection();
-            try{
+            try {
                 InputStream in = new BufferedInputStream(connection.getInputStream());
-                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                 StringBuilder responseStrBuilder = new StringBuilder();
                 String inputStr;
-                while ((inputStr = streamReader.readLine()) != null)
+                while ((inputStr = streamReader.readLine()) != null) {
                     responseStrBuilder.append(inputStr);
+                }
                 String response = responseStrBuilder.toString();
                 JSONObject jsonObject = new JSONObject(response);
                 JSONObject main = jsonObject.getJSONObject("main");
@@ -314,14 +332,11 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
                 JSONArray weather = jsonObject.getJSONArray("weather");
                 JSONObject firstobject = weather.getJSONObject(0);
                 wheathercondition = firstobject.getString("main");
-            }
-            finally
-            {
+            } finally {
                 connection.disconnect();
             }
-        }catch(IOException | JSONException e) {
-            String t = e.getMessage();
+        } catch (IOException | JSONException ignored) {
         }
-
     }
+
 }

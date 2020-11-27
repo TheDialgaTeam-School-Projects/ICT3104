@@ -55,4 +55,13 @@
             android:textSize="32dp"
             android:id="@+id/tv_degree"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewNavigationRoute"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/mapViewAr"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

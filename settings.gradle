@@ -1,4 +1,5 @@
-include ':java_to_unity_proxy'
 include ':unityLibrary'
+include ':java_to_unity_proxy'
 include ':app'
+project(':unityLibrary').projectDir = new File(rootDir, 'unity_src/Bin/unityLibrary/')
 rootProject.name = "Project"
