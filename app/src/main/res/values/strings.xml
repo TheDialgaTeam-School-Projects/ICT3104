@@ -39,11 +39,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     
     <string-array name="placeOfInterest">
-        <item>item 1</item>
-        <item>item 2 </item>
-        <item>item 3 </item>
-        <item>item 4</item>
-        <item>item 5</item>
+        <item>Staircase</item>
+        <item>Ramp</item>
+        <item>Bollard</item>
+        <item>Jogging Path</item>
+        <item>Bench</item>
 
     </string-array>
     
