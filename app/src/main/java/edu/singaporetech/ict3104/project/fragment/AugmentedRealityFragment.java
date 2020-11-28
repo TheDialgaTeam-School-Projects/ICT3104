@@ -134,8 +134,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         positionSensor = new PositionSensor(requireContext());
 
         locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 
         navController = activity.getNavController();
 

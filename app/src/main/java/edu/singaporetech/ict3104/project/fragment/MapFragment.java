@@ -211,8 +211,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onLocationChanged(Location newLocation) {
         lastKnownLocation=newLocation;
         CreateMarkers(populateListofNearbyPlaces(newLocation));
-
-
     }
 
 
@@ -275,6 +273,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         super.onDestroy();
         mMapView.onDestroy();
         stopRepeatingTask();
+        mLocationManager.removeUpdates(this);
+
     }
     void startRepeatingTask() {
         mStatusChecker.run();
