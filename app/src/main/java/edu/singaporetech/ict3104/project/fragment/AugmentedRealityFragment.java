@@ -127,8 +127,8 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         positionSensor = new PositionSensor(requireContext());
 
         locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
 
         frameLayout = view.findViewById(R.id.unityLayout);
         frameLayout.addView(activity.getUnityPlayer().getView());
@@ -200,7 +200,7 @@ public class AugmentedRealityFragment extends Fragment implements LocationListen
         endLocation.setLongitude(end.longitude);
 
         final float distanceRemaining = location.distanceTo(endLocation);
-
+        float hg= location.getAccuracy();
         if (distanceRemaining < location.getAccuracy()) {
             currentLocationStepIndex++;
         }

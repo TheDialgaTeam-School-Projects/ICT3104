@@ -200,8 +200,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             return;
         }
         mLocationManager = (LocationManager) requireContext().getSystemService(LOCATION_SERVICE);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
 
     }
 
@@ -472,7 +472,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
         try {
             if (locationPermissionGranted) {
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
