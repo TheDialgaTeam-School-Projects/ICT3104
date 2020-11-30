@@ -4,7 +4,7 @@
 * R2: Complete
 * R3: Complete
 * R4: Partially Complete ( Able to spawn virtual objects when using AR but virtual objects not interactable ) 
-* R5: Incomplete ( 0% progress )
+* R5: Incomplete 
 * R6: Complete
 * R7: Complete
 * R8: Complete
